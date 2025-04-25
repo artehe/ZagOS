@@ -1,0 +1,15 @@
+{
+    "tasks": [
+        {
+            "label": "Build & Launch Qemu",
+            "type": "shell",
+            "command": "zig build qemu-debug",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+    ],
+    "version": "2.0.0",
+}

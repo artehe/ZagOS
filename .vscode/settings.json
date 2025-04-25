@@ -1,0 +1,15 @@
+{
+    "[zig]": {
+        "editor.defaultFormatter": "ziglang.vscode-zig"
+    },
+    "editor.formatOnSave": true,
+    "editor.rulers": [
+        128
+    ],
+    "files.insertFinalNewline": true,
+    "zig.buildOnSave": false,
+    "zig.zls.enabled": "on",
+    "zig.zls.enableSnippets": true,
+    "zig.zls.highlightGlobalVarDeclarations": false,
+    "zig.zls.warnStyle": true,
+}

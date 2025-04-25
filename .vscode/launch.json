@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "cwd": "${workspaceRoot}",
+            "executable": "./zig-out/bin/kernel.elf",
+            "gdbpath": "gdb",
+            "name": "Debug with Qemu",
+            "preLaunchTask": "Build & Launch Qemu",
+            "printCalls": true,
+            "remote": true,
+            "request": "attach",
+            "stopAtEntry": true,
+            "target": "localhost:1234",
+            "type": "gdb",
+            "valuesFormatting": "parseText",
+        },
+    ],
+    "version": "0.2.0",
+}
