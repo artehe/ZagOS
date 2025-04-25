@@ -4,7 +4,7 @@
     },
     "editor.formatOnSave": true,
     "editor.rulers": [
-        128
+        100
     ],
     "files.insertFinalNewline": true,
     "zig.buildOnSave": false,
