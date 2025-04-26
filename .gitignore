@@ -1,0 +1,13 @@
+# Compiled Zig output
+.zig-cache
+zig-out
+
+# Limine bootloader source
+boot/limine
+
+# Log files
+*.log
+
+# ISO files
+iso/
+*.iso
