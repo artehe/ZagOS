@@ -1,5 +1,10 @@
+# Available arch options = x86_64
+ARCH := x86_64
+# Available optimization levelss = Debug, ReleaseSafe, ReleaseFast, ReleaseSmall
+OPTIMIZATION_LEVEL := Debug
+
 # Zig compiler flags.
-ZIG_FLAGS := -Doptimize=ReleaseSafe
+ZIG_FLAGS := -Dtarget=$(ARCH) -Doptimize=$(OPTIMIZATION_LEVEL)
 
 # Bootloader paths
 LIMINE_PATH := boot/limine
@@ -12,7 +17,7 @@ ISO_DIR := iso
 KERNEL := kernel/zig-out/bin/kernel
 
 # Qemu emulator
-QEMU := qemu-system-x86_64
+QEMU := qemu-system-$(ARCH)
 QEMU_FLAGS := -m 128M -cdrom $(ISO) -serial file:serial.log -daemonize
 QEMU_DEBUG_FLAGS := -s
 
