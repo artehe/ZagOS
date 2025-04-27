@@ -182,7 +182,7 @@ const Uart = struct {
     };
 
     /// Initializes our UART device.
-    fn init(self: Uart) void {
+    fn init(self: *Uart) void {
         // Disable all interrupts.
         const ier: InterruptEnableRegister = .{};
         self.writeRegister(.ICR, ier.toByte());
@@ -231,6 +231,9 @@ const Uart = struct {
         // (not-loopback with IRQs enabled and OUT#1 and OUT#2 bits enabled)
         mcr.loop = 0;
         self.writeRegister(.MCR, mcr.toByte());
+
+        // We made it here so the UART device should now be initialised.
+        self.isInit = true;
     }
 
     /// Check if there's data available to read
@@ -259,7 +262,7 @@ const Uart = struct {
     pub fn readByte(self: Uart) u8 {
         // Check the interface has been initialised
         if (!self.isInit) {
-            self.init();
+            init(@constCast(&self));
         }
 
         while (self.isReceiveBufferEmpty()) {}
@@ -270,7 +273,7 @@ const Uart = struct {
     pub fn writeByte(self: Uart, b: u8) void {
         // Check the interface has been initialised
         if (!self.isInit) {
-            self.init();
+            init(@constCast(&self));
         }
 
         // Wait until the transmit buffer is empty
