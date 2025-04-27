@@ -4,7 +4,7 @@ ARCH := x86_64
 OPTIMIZATION_LEVEL := Debug
 
 # Zig compiler flags.
-ZIG_FLAGS := -Dtarget=$(ARCH) -Doptimize=$(OPTIMIZATION_LEVEL)
+ZIG_FLAGS := -Darch=$(ARCH) -Doptimize=$(OPTIMIZATION_LEVEL)
 
 # Bootloader paths
 LIMINE_PATH := boot/limine
@@ -14,7 +14,7 @@ ISO := ZagOS.iso
 ISO_DIR := iso
 
 # Kernel paths
-KERNEL := kernel/zig-out/bin/kernel
+KERNEL := kernel/zig-out/bin/kernel.elf
 
 # Qemu emulator
 QEMU := qemu-system-$(ARCH)

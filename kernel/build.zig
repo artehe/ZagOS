@@ -1,13 +1,13 @@
 const std = @import("std");
 
-/// An enum of the CPU architechtures we want to build for.
-const Target = enum {
+/// An enum of the CPU architechtures supported.
+const Arch = enum {
     x86_64,
 };
 
 /// Get target query for the kernel based on the target value
-fn getTargetQuery(target: Target) std.Target.Query {
-    return switch (target) {
+fn getTargetQuery(arch: Arch) std.Target.Query {
+    return switch (arch) {
         .x86_64 => {
             // Disable all hardware floating point features.
             var disabled_features: std.Target.Cpu.Feature.Set = .empty;
@@ -36,20 +36,20 @@ fn getTargetQuery(target: Target) std.Target.Query {
 
 pub fn build(b: *std.Build) void {
     // Create an option to specify the target CPU arch we want to build for
-    const target = b.option(
-        Target,
-        "target",
-        "Target to build for",
+    const arch = b.option(
+        Arch,
+        "arch",
+        "Target architecture to build for",
     ) orelse .x86_64;
 
     // Optimization level(s) to use
     const optimize = b.standardOptimizeOption(.{});
 
-    const target_query = getTargetQuery(target);
+    const target_query = getTargetQuery(arch);
     const resolved_target_query = b.resolveTargetQuery(target_query);
 
     // Create the kernel executable.
-    switch (target) {
+    switch (arch) {
         .x86_64 => {
             // Build the kernel
             const kernel = b.addExecutable(.{
@@ -64,8 +64,12 @@ pub fn build(b: *std.Build) void {
             });
 
             // Add the Limine library as a dependency.
-            const limine = b.dependency("limine_zig", .{});
-            kernel.root_module.addImport("limine", limine.module("limine"));
+            const limine_zig = b.dependency("limine_zig", .{
+                .allow_deprecated = false,
+                .api_revision = 3,
+            });
+            const limine_module = limine_zig.module("limine");
+            kernel.root_module.addImport("limine", limine_module);
 
             // Disable features that are problematic in kernel space.
             kernel.root_module.red_zone = false;
