@@ -66,6 +66,7 @@ clean:
 	rm -rf kernel/zig-out
 	rm -rf $(ISO_DIR) 
 	rm $(ISO)
+	rm serial.log
 
 # Build the kernel binary.
 .PHONY: kernel
