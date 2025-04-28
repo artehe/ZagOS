@@ -196,7 +196,7 @@ const Uart = struct {
         self.writeRegister(.LCR, lcr.toByte());
         // Send data to the dataPort to set the BAUD rate (the frequency that we want to communicate at).
         // This is calcualted by taking 115200 divided by the value we send to the data port in this case 8.
-        self.writeByte(0x08);
+        self.writeRegister(.DATA, 0x08);
         self.writeRegister(.ICR, 0x00);
         // Now the baud rate is set configure the Line Control Register (8 bits, no parity, one stop bit)
         lcr.divisor_latch_access = 0;
@@ -222,8 +222,8 @@ const Uart = struct {
             .data_terminal_ready = 1,
         };
         self.writeRegister(.MCR, mcr.toByte());
-        self.writeByte(0xAE);
-        if (self.readByte() != 0xAE) {
+        self.writeRegister(.DATA, 0xAE);
+        if (self.readRegister(.DATA) != 0xAE) {
             // If we don't get the same byte back we know that there is a problem
             @panic("UART serial driver failed to initialise");
         }
