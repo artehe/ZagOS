@@ -6,8 +6,8 @@ const log = std.log.scoped(.platform);
 pub const serial = @import("serial.zig");
 
 // Some constants defined in the kernel linker script
-extern const __stack_bottom: u8;
-extern const __stack_top: u8;
+extern const __kernel_start: usize;
+extern const __kernel_end: usize;
 
 /// Stop any interrupts from being triggered and then loop endlessly
 pub fn hang() noreturn {
@@ -21,10 +21,4 @@ pub fn hang() noreturn {
 pub fn init() void {
     log.info("Initialising kernel for x86_64", .{});
     // TODO gdt.init();
-}
-
-/// Do essential work prior to initialising the rest of the OS
-pub inline fn setup() void {
-    // Setup the kernel's stack
-    asm volatile ("mov %rsp, __stack_top");
 }
