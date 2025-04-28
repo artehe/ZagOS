@@ -3,7 +3,7 @@
         {
             "label": "Build & Launch Qemu",
             "type": "shell",
-            "command": "zig build qemu-debug",
+            "command": "make run-debug",
             "problemMatcher": [],
             "group": {
                 "kind": "build",

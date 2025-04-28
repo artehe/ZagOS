@@ -2,7 +2,7 @@
     "configurations": [
         {
             "cwd": "${workspaceRoot}",
-            "executable": "./zig-out/bin/kernel.elf",
+            "executable": "./kernel/zig-out/bin/kernel.elf",
             "gdbpath": "gdb",
             "name": "Debug with Qemu",
             "preLaunchTask": "Build & Launch Qemu",
