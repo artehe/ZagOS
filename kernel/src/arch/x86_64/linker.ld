@@ -24,7 +24,6 @@ PHDRS {
 SECTIONS {
     /* Specify where to start the kernel from in memory */
     . = KERNEL_START;
-    __kernel_start = .;
 
     /* Define a section to contain the Limine requests and assign it to its own PHDR */
     .limine_requests : {
@@ -71,6 +70,4 @@ SECTIONS {
         *(.eh_frame*)
         *(.note .note.*)
     }
-
-    __kernel_end = .;
 }

@@ -5,10 +5,6 @@ const log = std.log.scoped(.platform);
 
 pub const serial = @import("serial.zig");
 
-// Some constants defined in the kernel linker script
-extern const __kernel_start: usize;
-extern const __kernel_end: usize;
-
 /// Stop any interrupts from being triggered and then loop endlessly
 pub fn hang() noreturn {
     asm volatile ("cli");
