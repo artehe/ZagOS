@@ -29,11 +29,12 @@ All the features currently implemented and also the implementation progress of p
   - [X] Boot with [Limine][2] into 64-bit (long mode)
 - Kernel
   - [X] Internal logging system using std log
+  - [X] Setup stack for kernel to use.
   - Architecture
     - x86_64
       - [X] Serial port I/O
       - [ ] Request framebuffer from limine to use for initial basic screen output.
-      - [ ] GDT and TSS
+      - [X] GDT and TSS
 
 ## Development
 

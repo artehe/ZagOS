@@ -40,6 +40,8 @@ pub fn panic(msg: []const u8, stack_trace: ?*builtin.StackTrace, return_address:
 
 /// The Kernel's entry point
 export fn _start() callconv(.C) noreturn {
+    arch.platform.setup();
+
     // Do not proceed if the kernel's base revision is not supported by the bootloader.
     if (!bootloader.base_revision.isSupported()) {
         log.err("Base revision not supported by bootloader", .{});

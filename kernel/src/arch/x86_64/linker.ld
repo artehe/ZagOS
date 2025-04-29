@@ -63,6 +63,11 @@ SECTIONS {
     .bss : {
         *(.bss*)
         *(COMMON*)
+        
+        . = ALIGN(16);
+        __stack_bottom = .;
+        . += KERNEL_STACK_SIZE;
+        __stack_top = .;
     } :data
 
     /* Discard .note.* and .eh_frame* since they may cause issues on some hosts. */
