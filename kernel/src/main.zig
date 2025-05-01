@@ -44,8 +44,7 @@ export fn _start() callconv(.C) noreturn {
 
     // Do not proceed if the kernel's base revision is not supported by the bootloader.
     if (!bootloader.base_revision.isSupported()) {
-        log.err("Base revision not supported by bootloader", .{});
-        arch.platform.hang();
+        @panic("Base revision not supported by bootloader");
     }
 
     main();
