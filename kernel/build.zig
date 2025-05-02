@@ -64,10 +64,7 @@ pub fn build(b: *std.Build) void {
             });
 
             // Add the Limine library as a dependency.
-            const limine_zig = b.dependency("limine_zig", .{
-                .allow_deprecated = false,
-                .api_revision = 3,
-            });
+            const limine_zig = b.dependency("limine_zig", .{});
             const limine_module = limine_zig.module("limine");
             kernel.root_module.addImport("limine", limine_module);
 

@@ -30,11 +30,19 @@ All the features currently implemented and also the implementation progress of p
 - Kernel
   - [X] Internal logging system using std log
   - [X] Setup stack for kernel to use.
+  - [ ] Switch Stack to request from Limine instead of hard coding...
   - Architecture
     - x86_64
       - [X] Serial port I/O
-      - [ ] Request framebuffer from limine to use for initial basic screen output.
       - [X] GDT and TSS
+  - Framebuffer
+    - [ ] Request from limine
+    - [ ] Clear screen
+    - [ ] Load font
+    - [ ] Draw fonts
+    - [ ] Draw characters
+    - [ ] Write text to screen
+    - [ ] Scrolling
 
 ## Development
 

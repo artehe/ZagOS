@@ -1,12 +1,17 @@
 //! The entry point to the kernel and where the magic begins
 
+const limine = @import("limine");
 const std = @import("std");
 const builtin = std.builtin;
 const log = std.log.scoped(.main);
 
 const arch = @import("arch.zig");
-const bootloader = @import("bootloader.zig");
+const limine_reuqests = @import("limine_requests.zig");
+const framebuffer = @import("framebuffer.zig");
 const logging = @import("logging.zig");
+
+/// Sets the base revision of the limine protocol which is supported by the kernel
+export var base_revision: limine.BaseRevision linksection(".limine_requests") = .init(3);
 
 /// Set the standard library options
 pub const std_options = std.Options{
@@ -17,6 +22,10 @@ pub const std_options = std.Options{
 /// The kernel's main function where most of the setup and then future runnin happens
 fn main() noreturn {
     log.info("Hello World from ZagOS Kernel", .{});
+
+    framebuffer.init();
+
+    // Initialize the rest of the system.
     arch.platform.init();
 
     // The kernel should NEVER return so loop endlessly.
@@ -43,7 +52,7 @@ export fn _start() callconv(.C) noreturn {
     arch.platform.setup();
 
     // Do not proceed if the kernel's base revision is not supported by the bootloader.
-    if (!bootloader.base_revision.isSupported()) {
+    if (!base_revision.isSupported()) {
         @panic("Base revision not supported by bootloader");
     }
 
