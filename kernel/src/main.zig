@@ -5,9 +5,9 @@ const std = @import("std");
 const builtin = std.builtin;
 const log = std.log.scoped(.main);
 
-const arch = @import("arch.zig");
+const arch = @import("arch/module.zig");
 const limine_reuqests = @import("limine_requests.zig");
-const framebuffer = @import("framebuffer.zig");
+const terminal = @import("terminal/module.zig");
 const logging = @import("logging.zig");
 
 /// Sets the base revision of the limine protocol which is supported by the kernel
@@ -23,7 +23,8 @@ pub const std_options = std.Options{
 fn main() noreturn {
     log.info("Hello World from ZagOS Kernel", .{});
 
-    framebuffer.init();
+    // Initialize the terminal.
+    terminal.init();
 
     // Initialize the rest of the system.
     arch.platform.init();

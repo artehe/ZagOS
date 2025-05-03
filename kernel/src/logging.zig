@@ -6,7 +6,7 @@ const fmt = std.fmt;
 const log = std.log.scoped(.logging);
 const Writer = std.io.Writer;
 
-const arch = @import("arch.zig");
+const arch = @import("arch/module.zig");
 
 const writer = Writer(void, error{}, writerCallback){
     .context = {},

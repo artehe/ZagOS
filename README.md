@@ -60,7 +60,7 @@ All the features currently implemented and also the implementation progress of p
     - Framebuffer
       - [X] Request from limine
       - [X] Clear screen
-      - [ ] Draw pixels to screen.
+      - [X] Draw pixels to screen.
     - Fonts
       - [ ] Load font
       - [ ] Draw fonts
