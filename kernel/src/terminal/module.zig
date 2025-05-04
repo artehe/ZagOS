@@ -21,7 +21,7 @@ pub fn init() void {
                 .x = 20 + x,
                 .y = 100 + y,
             };
-            framebuffer.setPixel(position, pixel);
+            framebuffer.writePixel(position, pixel);
         }
     }
 

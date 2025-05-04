@@ -62,14 +62,15 @@ All the features currently implemented and also the implementation progress of p
       - [X] Clear screen
       - [X] Draw pixels to screen.
     - Fonts
-      - [ ] Load font
-      - [ ] Draw fonts
-      - [ ] Draw characters
-      - [ ] Write text to screen
-    - [ ] Add Color Support
-    - [ ] Add ANSI Support: ANSI (American National Standards Institute) a standardised system of escape codes that modern computer terminals should understand. These escape codes allow a computer program to manipulate terminal color, text effects, clear the screen and move the text cursor around. [ANSI Escape Codes - Wikipedia](https://en.wikipedia.org/wiki/ANSI_escape_code).
+      - [ ] Work out what font to use (PSF format?) - possible option: <http://www.fial.com/~scott/tamsyn-font/>
+      - [ ] Load font (handle probable psf format)
+      - [ ] Draw fonts / characters
+    - [ ] Write text to screen
+    - [ ] Add color support
+    - [ ] Add ANSI support: ANSI (American National Standards Institute) a standardised system of escape codes that modern computer terminals should understand. These escape codes allow a computer program to manipulate terminal color, text effects, clear the screen and move the text cursor around. [ANSI Escape Codes - Wikipedia](https://en.wikipedia.org/wiki/ANSI_escape_code).
     - [ ] Add Scrolling
     - [ ] Keyboard Input
+    - [ ] Add cursor?
   - [ ] Filesystem(s) & Storage drivers (HDD, CD, FLP, Ramdisk)
   - [ ] Internal Debugger
 - Testing

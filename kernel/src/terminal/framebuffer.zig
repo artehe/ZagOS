@@ -54,7 +54,7 @@ pub fn clear() void {
 }
 
 /// Sets a pixel in the framebuffer at the provided position
-pub fn setPixel(position: Position, pixel: Pixel) void {
+pub fn writePixel(position: Position, pixel: Pixel) void {
     // Use pitch to calculate the pixel offset of target line
     const line_offset = position.y * pitch;
     // Add x position to get the absolute pixel offset in buffer
