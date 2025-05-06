@@ -6,7 +6,7 @@ An experimental toy kernel/OS written using [Zig][1] as much as possible. Assemb
 
 Currently the only supported architecture is x86_64 (x64). However the project should hopefully be setup and configured in such a way that if I (or maybe someone else) decides they want to learn and support another architecture then this could be relatively easily implemented.
 
-![Boot](docs/assets/boot.png)
+![Booted](assets/screenshots/booted.png)
 
 ## Contents
 
@@ -18,6 +18,7 @@ Currently the only supported architecture is x86_64 (x64). However the project s
   - [Run](#run)
   - [Debug](#debug)
 - [License](#license)
+  - [3rd Party Acknowledgments](#3rd-party-acknowledgments)
 - [Contributing](#contributing)
 - [Light reading](#light-reading)
 
@@ -62,8 +63,9 @@ All the features currently implemented and also the implementation progress of p
       - [X] Clear screen
       - [X] Draw pixels to screen.
     - Fonts
-      - [ ] Work out what font to use (PSF format?) - possible option: <http://www.fial.com/~scott/tamsyn-font/>
+      - [ ] Bundle font into kernel
       - [ ] Load font (handle probable psf format)
+      - [ ] Save font to disk and then load dynamically.
       - [ ] Draw fonts / characters
     - [ ] Write text to screen
     - [ ] Add color support
@@ -172,7 +174,14 @@ Alternatively if you use VS Code then this can be done from within the editor by
 
 ## License
 
-This project is licensed under the Unlicense ([LICENSE](LICENSE) or <https://opensource.org/license/Unlicense>)
+This project is licensed under the Unlicense ([LICENSE](LICENSE) or <https://opensource.org/license/Unlicense>), with the exceptions of the 3rd party software/assets which are noted below
+
+### 3rd Party Acknowledgments
+
+ZagOS depends on several other projects for assets and/or software. These dependencies are NOT covered by the for ZagOS License. These are instead licensed as described by each individual project's documentation, and with the licenses used by said projects linked in the list below:
+
+- [Limine Bootloader][2] ([LICENSE](https://github.com/limine-bootloader/limine/blob/v9.x/LICENSES/LicenseRef-scancode-bsd-no-disclaimer-unmodified.txt))
+- [Tamsyn Font][3] ([LICENSE](assets/fonts/tamsyn-font-1.11/LICENSE))
 
 ## Contributing
 
@@ -186,3 +195,4 @@ Some very helpful documents which can be useful for developing this OS:
 
 [1]: https://ziglang.org/
 [2]: https://github.com/limine-bootloader/limine
+[3]: http://www.fial.com/~scott/tamsyn-font/
