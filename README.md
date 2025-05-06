@@ -172,7 +172,7 @@ Alternatively if you use VS Code then this can be done from within the editor by
 
 ## License
 
-This project, with exception of the `ovmf` folder, is licensed under the Unlicense ([LICENSE](LICENSE) or <https://opensource.org/license/Unlicense>)
+This project is licensed under the Unlicense ([LICENSE](LICENSE) or <https://opensource.org/license/Unlicense>)
 
 ## Contributing
 
