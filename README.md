@@ -31,7 +31,6 @@ All the features currently implemented and also the implementation progress of p
 - Kernel
   - [X] Internal logging system
   - [X] Kernel stack
-  - [ ] Switch Stack to request from Limine instead of hard coding...
   - Panic
     - [ ] Print stack trace (and possibly other useful information) from panic
     - [ ] Expand Panic to output full stack traces and other useful information

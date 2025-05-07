@@ -22,7 +22,6 @@ fn writerCallback(_: void, data: []const u8) error{}!usize {
 
 /// Prints out a formatted string, just like std.debug.print
 fn writeFormattedString(comptime format: []const u8, args: anytype) void {
-    // TODO handle catch
     fmt.format(writer, format, args) catch unreachable;
 }
 

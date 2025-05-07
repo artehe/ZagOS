@@ -8,10 +8,10 @@ const limine = @import("limine");
 const FramebufferRequest = limine.FramebufferRequest;
 
 /// Represents a pixel to be inserted into the frame buffer using and RGB based colour mode
-pub const Pixel = packed struct {
-    red: u8,
-    green: u8,
+pub const Pixel = struct {
     blue: u8,
+    green: u8,
+    red: u8,
     padding: u8 = 0,
 
     pub fn init(red: u8, green: u8, blue: u8) Pixel {
@@ -82,7 +82,7 @@ pub fn init() void {
 
         // Calculate the total size of the framebuffer
         size = width * height;
-        log.info("size: {}, width {}, height {}, pitch {}", .{ size, width, height, pitch });
+        log.debug("size: {}, width {}, height {}, pitch {}", .{ size, width, height, pitch });
 
         // Create the slice that will allow us to access the framebuffer memory safely
         const raw_framebuffer: [*]volatile Pixel = @ptrCast(@alignCast(selected_frambuffer.address));
