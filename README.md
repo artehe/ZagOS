@@ -62,7 +62,7 @@ All the features currently implemented and also the implementation progress of p
       - [X] Clear screen
       - [X] Draw pixels to screen.
     - Fonts
-      - [ ] Bundle font into kernel
+      - [X] Bundle font into kernel
       - [ ] Load font (handle probable psf format)
       - [ ] Save font to disk and then load dynamically.
       - [ ] Draw fonts / characters
