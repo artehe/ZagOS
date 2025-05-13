@@ -7,14 +7,12 @@ const log = std.log.scoped(.framebuffer);
 const limine = @import("limine");
 const FramebufferRequest = limine.FramebufferRequest;
 
-/// Represents a pixel to be inserted into the frame buffer using and RGB based colour mode
-pub const Pixel = struct {
+pub const Colour = packed struct {
     blue: u8,
     green: u8,
     red: u8,
-    padding: u8 = 0,
 
-    pub fn init(red: u8, green: u8, blue: u8) Pixel {
+    pub fn init(red: u8, green: u8, blue: u8) Colour {
         return .{
             .red = red,
             .green = green,
@@ -29,28 +27,55 @@ pub const Position = struct {
     y: usize,
 };
 
+/// Represents a pixel to be inserted into the frame buffer using and RGB based colour mode
+pub const Pixel = packed struct {
+    color: Colour,
+    padding: u8 = 0,
+
+    pub fn init(color: Colour) Pixel {
+        return .{
+            .color = color,
+        };
+    }
+};
+
 /// Bits per pixel.
 const bits_per_pixel = 32;
 
 /// Slice of the framebuffer memory.
 var framebuffer: []volatile Pixel = undefined;
-/// Height of the framebuffer in pixels.
-var height: usize = undefined;
 /// The line length + padding at the end of the line. Note: this variable can also known as stride
 /// in some documentation
 var pitch: usize = undefined;
 /// The size of the framebuffer in bytes
 var size: usize = undefined;
+
+/// Height of the framebuffer in pixels.
+pub var height: usize = undefined;
 /// Width of the framebuffer in pixels.
-var width: usize = undefined;
+pub var width: usize = undefined;
 
 /// The framebuffer request structure which is filled by the Limine bootloader.
 export var framebuffer_request: FramebufferRequest linksection(".limine_requests") = .{};
 
 // Clear the framebuffer
 pub fn clear() void {
-    const blank_pixel = Pixel.init(0x00, 0x00, 0x00);
+    const blank_pixel = Pixel.init(Colour.init(0x00, 0x00, 0x00));
     @memset(framebuffer, blank_pixel);
+}
+
+/// Scrolls the screen up one line of characters
+pub fn scrollUp(line_height: usize, colour: Colour) void {
+    const screen = height * width;
+    const line = line_height * width;
+
+    // Copy the entire screen one line up.
+    for (0..(screen - line) / 2) |i| {
+        framebuffer[i] = framebuffer[i + line / 2];
+    }
+
+    // Clear the last line.
+    @memset(framebuffer[screen - line .. screen], Pixel.init(colour));
 }
 
 /// Sets a pixel in the framebuffer at the provided position

@@ -3,8 +3,8 @@
 const std = @import("std");
 const builtin = @import("builtin");
 const fmt = std.fmt;
-const log = std.log.scoped(.logging);
 const Writer = std.io.Writer;
+const log = std.log.scoped(.logging);
 
 const arch = @import("arch/module.zig");
 
