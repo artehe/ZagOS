@@ -5,8 +5,9 @@ const Endian = std.builtin.Endian;
 const log = std.log.scoped(.font);
 
 /// Options for the common PSF struct generator
-const PSFHeaderMetrics = struct {
+const PsfHeaderMetrics = struct {
     file: []const u8,
+    has_unicode_table: bool,
     header_size: u32,
     glyph_count: u32,
     glyph_size: u32,
@@ -22,7 +23,7 @@ const PSF1_MODE_HASTAB = 0x02;
 const PSF1_MODE_HASSEQ = 0x04;
 
 // Given font metrics, generate a struct type which can read font glyphs at compile time
-fn BuildPsfCommon(comptime options: PSFHeaderMetrics) type {
+fn BuildPsfCommon(comptime options: PsfHeaderMetrics) type {
     return struct {
         const Self = @This();
         const PixelIterator = PsfPixelIterator(Self);
@@ -31,15 +32,11 @@ fn BuildPsfCommon(comptime options: PSFHeaderMetrics) type {
         pub const Glyph = [options.glyph_size]u8;
         pub const GlyphSet = [options.glyph_count]Glyph;
 
-        // Font metadata
-        pub const glyph_height: u32 = options.glyph_height;
-        pub const glyph_width: u32 = options.glyph_width;
-
         glyphs: GlyphSet,
-        // TODO: unicode table
-
         glyph_count: u32,
+        glyph_height: u32,
         glyph_size: u32,
+        glyph_width: u32,
 
         pub fn init() Self {
             // Get a stream over the embedded file and skip the header
@@ -66,9 +63,11 @@ fn BuildPsfCommon(comptime options: PSFHeaderMetrics) type {
         }
 
         pub fn pixelIterator(self: *const Self, glyph: u32) PixelIterator {
-            var iter = PixelIterator{ .font = self, .glyph = glyph };
+            var iter = PixelIterator{
+                .font = self,
+                .glyph = glyph,
+            };
             iter.reset();
-
             return iter;
         }
     };
@@ -88,6 +87,7 @@ fn BuildPsf1Font(comptime file: []const u8) type {
 
     return BuildPsfCommon(.{
         .file = file,
+        .has_unicode_table = false,
         // bytes
         .header_size = 4,
         // always 256, unless 512 mode
@@ -111,7 +111,7 @@ fn BuildPsf2Font(comptime file: []const u8) type {
     const header_size = try reader.readInt(u32, Endian.little);
 
     // Flags (1 if unicode table)
-    _ = try reader.readInt(u32, Endian.little);
+    const flags = try reader.readInt(u32, Endian.little);
 
     const glyph_count = try reader.readInt(u32, Endian.little);
     const glyph_size = try reader.readInt(u32, Endian.little);
@@ -120,7 +120,7 @@ fn BuildPsf2Font(comptime file: []const u8) type {
 
     return BuildPsfCommon(.{
         .file = file,
-        // 8 u32 fields, = 32 bytes
+        .has_unicode_table = flags == 1,
         .header_size = header_size,
         .glyph_count = glyph_count,
         .glyph_height = glyph_height,
@@ -149,11 +149,6 @@ fn PsfPixelIterator(comptime T: type) type {
         // The byte we're currently destructing to get bits
         workglyph: u8 = undefined,
 
-        /// Resets the iterator to the initial state.
-        pub fn reset(self: *Self) void {
-            self.resetIndex(0);
-        }
-
         /// Aligns to the next byte
         pub fn alignForward(self: *Self) void {
             if (self.bitcount > 0) {
@@ -161,21 +156,33 @@ fn PsfPixelIterator(comptime T: type) type {
             }
         }
 
+        pub fn getGlyph(self: *Self) *const [14]u8 {
+            return &self.font.glyphs[self.glyph];
+        }
+
         /// Returns whether the next pixel is set or not,
         /// or null if we've read all pixels for the glyph
         pub fn next(self: *Self) ?bool {
-            if (self.index >= self.font.glyph_size)
+            if (self.index >= self.font.glyph_size) {
                 return null;
+            }
 
             defer {
                 self.bitcount += 1;
                 // TODO: memorize the min? this happens on every iteration
-                if (self.bitcount >= std.math.min(8, self.font.glyph_width)) {
+                if (self.bitcount >= @min(8, self.font.glyph_width)) {
                     self.resetIndex(self.index + 1);
                 }
             }
 
-            return @shlWithOverflow(self.workglyph, 1);
+            const shift_with_overflow = @shlWithOverflow(self.workglyph, 1);
+            self.workglyph = shift_with_overflow[0];
+            return @bitCast(shift_with_overflow[1]);
+        }
+
+        /// Resets the iterator to the initial state.
+        pub fn reset(self: *Self) void {
+            self.resetIndex(0);
         }
 
         // Reset to the given index

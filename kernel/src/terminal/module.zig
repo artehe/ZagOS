@@ -10,7 +10,7 @@ const font = @import("font.zig");
 const framebuffer = @import("framebuffer.zig");
 const Colour = framebuffer.Colour;
 
-const FONT = font.BuildFont("Tamsyn7x14r.psf");
+const active_font = font.BuildFont("Tamsyn7x14r.psf").init();
 
 /// Current background color.
 const background_colour: Colour = Colour.init(0x00, 0x00, 0x00);
@@ -33,13 +33,14 @@ var screen_height: usize = undefined;
 
 /// Draws a font glyph at the given coordinates.
 fn drawGlyph(character: u8, x: usize, y: usize, fg: Colour, bg: Colour) void {
-    const position: framebuffer.Position = .{
+    var position: framebuffer.Position = .{
         .x = x,
         .y = y,
     };
 
-    const glyph_iterator = FONT.pixelIterator(character);
-    while (try glyph_iterator.next()) |is_pixel_set| {
+    var glyph_iterator = active_font.pixelIterator(character);
+    log.info("Writing glyph {any}", .{glyph_iterator.getGlyph()});
+    while (glyph_iterator.next()) |is_pixel_set| {
         var colour = bg;
         if (is_pixel_set) {
             colour = fg;
@@ -48,8 +49,8 @@ fn drawGlyph(character: u8, x: usize, y: usize, fg: Colour, bg: Colour) void {
         framebuffer.writePixel(position, framebuffer.Pixel.init(colour));
 
         position.x += 1;
-        if (position.x > FONT.glyph_width) {
-            position.x = 0;
+        if (position.x > x + active_font.glyph_width) {
+            position.x = x;
             position.y += 1;
         }
     }
@@ -57,7 +58,7 @@ fn drawGlyph(character: u8, x: usize, y: usize, fg: Colour, bg: Colour) void {
 
 /// Scroll's the screen up one line and resets the cursor's horizontal position
 fn scrollUp() void {
-    framebuffer.scrollUp(FONT.glyph_height, background_colour);
+    framebuffer.scrollUp(active_font.glyph_height, background_colour);
     cursor_position.x = 0;
 }
 
@@ -74,8 +75,8 @@ fn writeCharacter(character: u8) void {
                 scrollUp();
             }
 
-            const x: usize = (cursor_position.x % screen_width) * FONT.glyph_width;
-            const y: usize = (cursor_position.y / screen_width) * FONT.glyph_height;
+            const x: usize = (cursor_position.x % screen_width) * active_font.glyph_width;
+            const y: usize = (cursor_position.y / screen_width) * active_font.glyph_height;
             drawGlyph(character, x, y, foreground_colour, background_colour);
 
             // Update the position of the cursor now that we've written a character
@@ -110,8 +111,8 @@ pub fn init() void {
     framebuffer.clear();
 
     // Calculate the screen dimensions.
-    screen_width = framebuffer.width / FONT.glyph_width;
-    screen_height = framebuffer.height / FONT.glyph_height;
+    screen_width = framebuffer.width / active_font.glyph_width;
+    screen_height = framebuffer.height / active_font.glyph_height;
     log.debug(
         "Screen dimentions for loaded font {}x{}",
         .{
