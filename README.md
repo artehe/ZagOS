@@ -63,9 +63,10 @@ All the features currently implemented and also the implementation progress of p
       - [X] Draw pixels to screen.
     - Fonts
       - [X] Bundle font into kernel
-      - [ ] Load font (handle probable psf format)
-      - [ ] Save font to disk and then load dynamically.
-      - [ ] Draw fonts / characters
+      - [X] Load PSF fonts
+      - [X] Draw fonts / characters
+      - [ ] Parse Unicode table if there is one and use it.
+      - [ ] Save font(s) to disk and then load dynamically as/if they are needed.
     - [ ] Write text to screen
     - [ ] Add color support
     - [ ] Add ANSI support: ANSI (American National Standards Institute) a standardised system of escape codes that modern computer terminals should understand. These escape codes allow a computer program to manipulate terminal color, text effects, clear the screen and move the text cursor around. [ANSI Escape Codes - Wikipedia](https://en.wikipedia.org/wiki/ANSI_escape_code).

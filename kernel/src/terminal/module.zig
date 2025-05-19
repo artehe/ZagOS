@@ -39,7 +39,6 @@ fn drawGlyph(character: u8, x: usize, y: usize, fg: Colour, bg: Colour) void {
     };
 
     var glyph_iterator = active_font.pixelIterator(character);
-    log.info("Writing glyph {any}", .{glyph_iterator.getGlyph()});
     while (glyph_iterator.next()) |is_pixel_set| {
         var colour = bg;
         if (is_pixel_set) {
@@ -49,7 +48,7 @@ fn drawGlyph(character: u8, x: usize, y: usize, fg: Colour, bg: Colour) void {
         framebuffer.writePixel(position, framebuffer.Pixel.init(colour));
 
         position.x += 1;
-        if (position.x > x + active_font.glyph_width) {
+        if (position.x >= x + active_font.glyph_width) {
             position.x = x;
             position.y += 1;
         }

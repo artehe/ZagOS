@@ -156,10 +156,6 @@ fn PsfPixelIterator(comptime T: type) type {
             }
         }
 
-        pub fn getGlyph(self: *Self) *const [14]u8 {
-            return &self.font.glyphs[self.glyph];
-        }
-
         /// Returns whether the next pixel is set or not,
         /// or null if we've read all pixels for the glyph
         pub fn next(self: *Self) ?bool {
@@ -169,9 +165,9 @@ fn PsfPixelIterator(comptime T: type) type {
 
             defer {
                 self.bitcount += 1;
-                // TODO: memorize the min? this happens on every iteration
-                if (self.bitcount >= @min(8, self.font.glyph_width)) {
-                    self.resetIndex(self.index + 1);
+                if (self.bitcount >= self.font.glyph_width) {
+                    const byte_width = (self.font.glyph_width + 7) / 8;
+                    self.resetIndex(self.index + byte_width);
                 }
             }
 
