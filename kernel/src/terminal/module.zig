@@ -65,7 +65,15 @@ fn scrollUp() void {
 fn writeCharacter(character: u8) void {
     switch (character) {
         // Newline.
-        '\n' => scrollUp(),
+        '\n' => {
+            cursor_position.x = 0;
+            cursor_position.y += 1;
+
+            // If we've run out of space, scroll the screen.
+            if (cursor_position.y >= screen_height) {
+                scrollUp();
+            }
+        },
 
         // Any other character.
         else => {
@@ -101,6 +109,12 @@ pub fn print(comptime format: []const u8, args: anytype) void {
     fmt.format(writer, format, args) catch unreachable;
 }
 
+pub fn printString(str: []const u8) void {
+    for (str) |byte| {
+        writeCharacter(byte);
+    }
+}
+
 /// Initializes the terminal ready for use.
 pub fn init() void {
     log.info("Loading terminal", .{});
@@ -119,17 +133,6 @@ pub fn init() void {
             screen_height,
         },
     );
-
-    const pixel = framebuffer.Pixel.init(Colour.init(0, 0, 255));
-    for (0..100) |x| {
-        for (0..100) |y| {
-            const position: framebuffer.Position = .{
-                .x = 20 + x,
-                .y = 100 + y,
-            };
-            framebuffer.writePixel(position, pixel);
-        }
-    }
 
     log.info("Done", .{});
 }

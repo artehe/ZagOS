@@ -7,22 +7,34 @@ const Writer = std.io.Writer;
 const log = std.log.scoped(.logging);
 
 const arch = @import("arch/module.zig");
+const terminal = @import("terminal/module.zig");
 
 const writer = Writer(void, error{}, writerCallback){
     .context = {},
 };
+
+var terminal_enabled: bool = false;
 
 fn writerCallback(_: void, data: []const u8) error{}!usize {
     switch (builtin.cpu.arch) {
         .x86_64 => arch.platform.serial.com1.writeString(data),
         else => @compileError("Architecture not currently supported!"),
     }
+
+    if (terminal_enabled) {
+        terminal.printString(data);
+    }
+
     return data.len;
 }
 
 /// Prints out a formatted string, just like std.debug.print
 fn writeFormattedString(comptime format: []const u8, args: anytype) void {
     fmt.format(writer, format, args) catch unreachable;
+}
+
+pub fn enableTerminal() void {
+    terminal_enabled = true;
 }
 
 /// Global logging Function

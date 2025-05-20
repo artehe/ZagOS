@@ -70,8 +70,8 @@ pub fn scrollUp(line_height: usize, colour: Colour) void {
     const line = line_height * width;
 
     // Copy the entire screen one line up.
-    for (0..(screen - line) / 2) |i| {
-        framebuffer[i] = framebuffer[i + line / 2];
+    for (0..size) |i| {
+        framebuffer[i] = framebuffer[i + line];
     }
 
     // Clear the last line.
