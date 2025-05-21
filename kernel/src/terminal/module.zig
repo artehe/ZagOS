@@ -75,6 +75,11 @@ fn writeCharacter(character: u8) void {
             }
         },
 
+        // Carriage Return
+        '\r' => {
+            cursor_position.x = 0;
+        },
+
         // Any other character.
         else => {
             // If we've run out of space, scroll the screen.
@@ -83,7 +88,7 @@ fn writeCharacter(character: u8) void {
             }
 
             const x: usize = (cursor_position.x % screen_width) * active_font.glyph_width;
-            const y: usize = (cursor_position.y / screen_width) * active_font.glyph_height;
+            const y: usize = cursor_position.y * active_font.glyph_height;
             drawGlyph(character, x, y, foreground_colour, background_colour);
 
             // Update the position of the cursor now that we've written a character

@@ -26,7 +26,7 @@ fn main() noreturn {
     // Initialize the terminal.
     terminal.init();
     logging.enableTerminal();
-    terminal.print("Welcome to ZagOS", .{});
+    log.info("Welcome to ZagOS\n", .{});
 
     // Initialize the rest of the system.
     arch.platform.init();
