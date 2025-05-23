@@ -1,14 +1,17 @@
 {
     "tasks": [
         {
-            "label": "Build & Launch Qemu",
-            "type": "shell",
             "command": "make run-debug",
-            "problemMatcher": [],
             "group": {
                 "kind": "build",
                 "isDefault": true
-            }
+            },
+            "label": "Build & Launch Qemu",
+            "presentation": {
+                "clear": true
+            },
+            "problemMatcher": [],
+            "type": "shell",
         },
     ],
     "version": "2.0.0",

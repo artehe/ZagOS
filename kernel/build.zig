@@ -51,6 +51,10 @@ pub fn build(b: *std.Build) void {
     // Create the kernel executable.
     switch (arch) {
         .x86_64 => {
+            // Load the Limine library
+            const limine_zig = b.dependency("limine_zig", .{});
+            const limine_module = limine_zig.module("limine");
+
             // Build the kernel
             const kernel = b.addExecutable(.{
                 .code_model = .kernel, // Higher half kernel.
@@ -64,8 +68,6 @@ pub fn build(b: *std.Build) void {
             });
 
             // Add the Limine library as a dependency.
-            const limine_zig = b.dependency("limine_zig", .{});
-            const limine_module = limine_zig.module("limine");
             kernel.root_module.addImport("limine", limine_module);
 
             // Disable features that are problematic in kernel space.
@@ -75,9 +77,9 @@ pub fn build(b: *std.Build) void {
             kernel.want_lto = false;
 
             // Delete unused sections to reduce the kernel size.
-            kernel.link_function_sections = true;
             kernel.link_data_sections = true;
             kernel.link_gc_sections = true;
+            kernel.link_function_sections = true;
 
             // Force the page size to 4 KiB to prevent binary bloat.
             kernel.link_z_max_page_size = 0x1000;
@@ -85,7 +87,36 @@ pub fn build(b: *std.Build) void {
             // Link with a custom linker script.
             kernel.setLinkerScript(b.path("src/arch/x86_64/linker.ld"));
 
+            // Add the kernel artifact to be generated
             b.installArtifact(kernel);
+
+            // Also create a test kernel
+            const test_kernel = b.addTest(.{
+                .name = "test_kernel.elf",
+                .omit_frame_pointer = false,
+                .optimize = optimize,
+                .pic = false,
+                .root_source_file = b.path("src/main.zig"),
+                .target = resolved_target_query,
+                .test_runner = .{
+                    .path = b.path("src/testing.zig"),
+                    .mode = .simple,
+                },
+            });
+            test_kernel.entry = .disabled;
+            test_kernel.link_data_sections = true;
+            test_kernel.link_function_sections = true;
+            test_kernel.link_gc_sections = true;
+            test_kernel.link_z_max_page_size = 0x1000;
+            test_kernel.linkage = .static;
+            test_kernel.root_module.addImport("limine", limine_module);
+            test_kernel.root_module.code_model = .kernel;
+            test_kernel.root_module.red_zone = false;
+            test_kernel.root_module.stack_check = false;
+            test_kernel.root_module.stack_protector = false;
+            test_kernel.setLinkerScript(b.path("src/arch/x86_64/linker.ld"));
+            test_kernel.want_lto = false;
+            //TODO this doesn't work? b.installArtifact(test_kernel);
         },
     }
 }

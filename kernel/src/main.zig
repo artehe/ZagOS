@@ -1,14 +1,15 @@
 //! The entry point to the kernel and where the magic begins
 
+const builtin = @import("builtin");
 const limine = @import("limine");
 const std = @import("std");
-const builtin = std.builtin;
 const log = std.log.scoped(.main);
 
 const arch = @import("arch/module.zig");
 const limine_reuqests = @import("limine_requests.zig");
-const terminal = @import("terminal/module.zig");
 const logging = @import("logging.zig");
+const terminal = @import("terminal/module.zig");
+const testing = @import("testing.zig");
 
 /// Sets the base revision of the limine protocol which is supported by the kernel
 export var base_revision: limine.BaseRevision linksection(".limine_requests") = .init(3);
@@ -26,7 +27,7 @@ fn main() noreturn {
     // Initialize the terminal.
     terminal.init();
     logging.enableTerminal();
-    log.info("Welcome to ZagOS\n", .{});
+    log.info("Welcome to ZagOS", .{});
 
     // Initialize the rest of the system.
     arch.platform.init();
@@ -37,7 +38,7 @@ fn main() noreturn {
 }
 
 /// Handles kernel panics, such @panic() or integer overflows.
-pub fn panic(msg: []const u8, stack_trace: ?*builtin.StackTrace, return_address: ?usize) noreturn {
+pub fn panic(msg: []const u8, stack_trace: ?*std.builtin.StackTrace, return_address: ?usize) noreturn {
     // TODO handle these and putput a proper stack trace etc etc
     _ = stack_trace;
     _ = return_address;
@@ -59,6 +60,10 @@ export fn _start() callconv(.C) noreturn {
         @panic("Base revision not supported by bootloader");
     }
 
-    main();
+    if (builtin.is_test) {
+        testing.testMain();
+    } else {
+        main();
+    }
     unreachable;
 }

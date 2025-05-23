@@ -1,6 +1,6 @@
 {
     "[zig]": {
-        "editor.defaultFormatter": "ziglang.vscode-zig"
+        "editor.defaultFormatter": "ziglang.vscode-zig",
     },
     "editor.formatOnSave": true,
     "editor.rulers": [

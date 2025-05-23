@@ -93,3 +93,7 @@ run: $(ISO)
 .PHONY: run-debug
 run-debug: $(ISO)
 	$(QEMU) $(QEMU_FLAGS) $(QEMU_DEBUG_FLAGS)
+
+.PHONY: test
+test: kernel
+	cd kernel && zig test $(ZIG_FLAGS)
