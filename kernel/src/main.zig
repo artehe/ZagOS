@@ -27,7 +27,7 @@ fn main() noreturn {
     // Initialize the terminal.
     terminal.init();
     logging.enableTerminal();
-    log.info("Welcome to ZagOS\n", .{});
+    log.info("Welcome to ZagOS", .{});
 
     // Initialize the rest of the system.
     arch.platform.init();
@@ -46,9 +46,12 @@ pub fn panic(msg: []const u8, stack_trace: ?*builtin.StackTrace, return_address:
 export fn _start() callconv(.C) noreturn {
     arch.platform.setup();
 
-    // Do not proceed if the kernel's base revision is not supported by the bootloader.
+    // Do not proceed if the kernel's base revision is not supported or valid.
     if (!base_revision.isSupported()) {
         @panic("Base revision not supported by bootloader");
+    }
+    if (!base_revision.isValid()) {
+        @panic("Base revision not valid");
     }
 
     main();
