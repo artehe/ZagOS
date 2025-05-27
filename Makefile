@@ -14,7 +14,7 @@ ISO := ZagOS.iso
 ISO_DIR := iso
 
 # Kernel paths
-KERNEL := kernel/zig-out/bin/kernel.elf
+KERNEL := kernel/zig-out/bin/kernel
 
 # Qemu emulator
 QEMU := qemu-system-$(ARCH)

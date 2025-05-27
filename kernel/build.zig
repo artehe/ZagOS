@@ -9,27 +9,19 @@ const Arch = enum {
 fn getTargetQuery(arch: Arch) std.Target.Query {
     return switch (arch) {
         .x86_64 => {
-            // Disable all hardware floating point features.
-            var disabled_features: std.Target.Cpu.Feature.Set = .empty;
-            disabled_features.addFeature(@intFromEnum(std.Target.x86.Feature.avx));
-            disabled_features.addFeature(@intFromEnum(std.Target.x86.Feature.avx2));
-            disabled_features.addFeature(@intFromEnum(std.Target.x86.Feature.mmx));
-            disabled_features.addFeature(@intFromEnum(std.Target.x86.Feature.sse));
-            disabled_features.addFeature(@intFromEnum(std.Target.x86.Feature.sse2));
-            disabled_features.addFeature(@intFromEnum(std.Target.x86.Feature.x87));
-
-            // Enable software floating point instead.
-            var enabled_features: std.Target.Cpu.Feature.Set = .empty;
-            enabled_features.addFeature(@intFromEnum(std.Target.x86.Feature.soft_float));
-
-            return std.Target.Query{
+            var query = std.Target.Query{
                 .abi = .none,
                 .cpu_arch = .x86_64,
-                .cpu_features_sub = disabled_features,
-                .cpu_features_add = enabled_features,
                 .ofmt = .elf,
                 .os_tag = .freestanding,
             };
+
+            // Disable all hardware floating point features and enable software floating point.
+            const Target = std.Target.x86;
+            query.cpu_features_sub = Target.featureSet(&.{ .avx, .avx2, .sse, .sse2, .mmx });
+            query.cpu_features_add = Target.featureSet(&.{ .popcnt, .soft_float });
+
+            return query;
         },
     };
 }
@@ -51,72 +43,48 @@ pub fn build(b: *std.Build) void {
     // Create the kernel executable.
     switch (arch) {
         .x86_64 => {
-            // Load the Limine library
-            const limine_zig = b.dependency("limine_zig", .{});
+            // We depend on the limine_zig package, which provides a module for
+            // interacting with the Limine bootloader.
+            const limine_zig = b.dependency("limine_zig", .{
+                .api_revision = 3,
+            });
             const limine_module = limine_zig.module("limine");
 
-            // Build the kernel
-            const kernel = b.addExecutable(.{
-                .code_model = .kernel, // Higher half kernel.
-                .linkage = .static, // Disable dynamic linking.
-                .name = "kernel.elf",
-                .omit_frame_pointer = false, // Needed for stack traces.
+            // Build the kernel 'module'
+            const kernel_module = b.addModule("kernel", .{
                 .optimize = optimize,
-                .pic = false, // Disable position independent code.
                 .root_source_file = b.path("src/main.zig"),
                 .target = resolved_target_query,
             });
 
-            // Add the Limine library as a dependency.
-            kernel.root_module.addImport("limine", limine_module);
+            // Specify the code model specific options.
+            kernel_module.red_zone = false;
+            kernel_module.code_model = .kernel;
 
-            // Disable features that are problematic in kernel space.
-            kernel.root_module.red_zone = false;
-            kernel.root_module.stack_check = false;
-            kernel.root_module.stack_protector = false;
-            kernel.want_lto = false;
+            // Add the limine module as an import to the kernel module.
+            kernel_module.addImport("limine", limine_module);
 
-            // Delete unused sections to reduce the kernel size.
-            kernel.link_data_sections = true;
-            kernel.link_gc_sections = true;
-            kernel.link_function_sections = true;
-
-            // Force the page size to 4 KiB to prevent binary bloat.
-            kernel.link_z_max_page_size = 0x1000;
-
-            // Link with a custom linker script.
-            kernel.setLinkerScript(b.path("src/arch/x86_64/linker.ld"));
-
-            // Add the kernel artifact to be generated
-            b.installArtifact(kernel);
+            // Create the kernel executable
+            const kernel_exe = b.addExecutable(.{
+                .name = "kernel",
+                .root_module = kernel_module,
+            });
+            kernel_exe.setLinkerScript(b.path("src/arch/x86_64/linker.ld"));
+            b.installArtifact(kernel_exe);
 
             // Also create a test kernel
-            const test_kernel = b.addTest(.{
-                .name = "test_kernel.elf",
-                .omit_frame_pointer = false,
-                .optimize = optimize,
-                .pic = false,
-                .root_source_file = b.path("src/main.zig"),
-                .target = resolved_target_query,
+            const kernel_test = b.addTest(.{
+                .name = "kernel_test",
+                .root_module = kernel_module,
                 .test_runner = .{
-                    .path = b.path("src/testing.zig"),
+                    .path = b.path("src/test_runner.zig"),
                     .mode = .simple,
                 },
+                .target = resolved_target_query,
             });
-            test_kernel.entry = .disabled;
-            test_kernel.link_data_sections = true;
-            test_kernel.link_function_sections = true;
-            test_kernel.link_gc_sections = true;
-            test_kernel.link_z_max_page_size = 0x1000;
-            test_kernel.linkage = .static;
-            test_kernel.root_module.addImport("limine", limine_module);
-            test_kernel.root_module.code_model = .kernel;
-            test_kernel.root_module.red_zone = false;
-            test_kernel.root_module.stack_check = false;
-            test_kernel.root_module.stack_protector = false;
-            test_kernel.setLinkerScript(b.path("src/arch/x86_64/linker.ld"));
-            test_kernel.want_lto = false;
-            //TODO this doesn't work? b.installArtifact(test_kernel);
+            kernel_test.root_module.addImport("kernel", kernel_module);
+            kernel_test.setLinkerScript(b.path("src/arch/x86_64/linker.ld"));
+            b.installArtifact(kernel_test);
         },
     }
 }
