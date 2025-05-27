@@ -5,12 +5,16 @@
 
 const builtin = @import("builtin");
 const std = @import("std");
-const log = std.log.scoped(.testing);
+const log = std.log.scoped(.test_runner);
 
-const arch = @import("arch/module.zig");
+const kernel = @import("kernel");
 
-/// The test runner's main function
-pub fn testMain() noreturn {
+/// Set the standard library options and panic function
+pub const std_options = kernel.std_options;
+pub const panic = kernel.panic;
+
+/// The custom test runner
+pub fn runTests() noreturn {
     const test_functions_list = builtin.test_functions;
     log.info("Found {} tests", .{test_functions_list.len});
 
@@ -44,9 +48,8 @@ pub fn testMain() noreturn {
     switch (builtin.cpu.arch) {
         .x86_64 => {
             log.debug("Shutting down", .{});
-            // TODO shutdown properly using UEFI?
         },
         else => @compileError("Architecture not currently supported!"),
     }
-    arch.platform.hang();
+    unreachable;
 }

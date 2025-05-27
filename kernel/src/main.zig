@@ -6,20 +6,23 @@ const std = @import("std");
 const log = std.log.scoped(.main);
 
 const arch = @import("arch/module.zig");
-const limine_reuqests = @import("limine_requests.zig");
+const limine_requests = @import("limine_requests.zig");
 const logging = @import("logging.zig");
 const kernel_panic = @import("panic.zig");
 const terminal = @import("terminal/module.zig");
-const testing = @import("testing.zig");
+const test_runner = @import("test_runner.zig");
 
-/// Sets the base revision of the limine protocol which is supported by the kernel
-export var base_revision: limine.BaseRevision linksection(".limine_requests") = .init(3);
+// As this need to be in the root source file, all we do is call our actual kernel panic handler
+pub const panic = kernel_panic.panic;
 
 /// Set the standard library options
 pub const std_options = std.Options{
     .log_level = .debug,
     .logFn = logging.logFn,
 };
+
+/// Sets the base revision of the limine protocol which is supported by the kernel
+export var base_revision: limine.BaseRevision linksection(".limine_requests") = .init(3);
 
 /// The kernel's main function where most of the setup and then future runnin happens
 fn main() noreturn {
@@ -38,11 +41,6 @@ fn main() noreturn {
     arch.platform.hang();
 }
 
-// As this need to be in the root source file, all we do is call our actual kernel panic handler
-pub fn panic(msg: []const u8, stack_trace: ?*std.builtin.StackTrace, return_address: ?usize) noreturn {
-    kernel_panic.panic(msg, stack_trace, return_address);
-}
-
 /// The Kernel's entry point
 export fn _start() callconv(.C) noreturn {
     arch.platform.setup();
@@ -56,9 +54,15 @@ export fn _start() callconv(.C) noreturn {
     }
 
     if (builtin.is_test) {
-        testing.testMain();
+        test_runner.runTests();
     } else {
         main();
     }
     unreachable;
+}
+
+test "testing simple sum" {
+    const a: u8 = 2;
+    const b: u8 = 2;
+    try std.testing.expect((a + b) == 4);
 }
