@@ -8,6 +8,7 @@ const log = std.log.scoped(.main);
 const arch = @import("arch/module.zig");
 const limine_reuqests = @import("limine_requests.zig");
 const logging = @import("logging.zig");
+const kernel_panic = @import("panic.zig");
 const terminal = @import("terminal/module.zig");
 const testing = @import("testing.zig");
 
@@ -37,27 +38,21 @@ fn main() noreturn {
     arch.platform.hang();
 }
 
-/// Handles kernel panics, such @panic() or integer overflows.
+// As this need to be in the root source file, all we do is call our actual kernel panic handler
 pub fn panic(msg: []const u8, stack_trace: ?*std.builtin.StackTrace, return_address: ?usize) noreturn {
-    // TODO handle these and putput a proper stack trace etc etc
-    _ = stack_trace;
-    _ = return_address;
-
-    log.err("!!! Kernel Panic !!!", .{});
-    log.err("{s}", .{msg});
-    log.err("!!! End Panic !!!", .{});
-
-    log.info("!!! Panic hanging forever !!!", .{});
-    arch.platform.hang();
+    kernel_panic.panic(msg, stack_trace, return_address);
 }
 
 /// The Kernel's entry point
 export fn _start() callconv(.C) noreturn {
     arch.platform.setup();
 
-    // Do not proceed if the kernel's base revision is not supported by the bootloader.
+    // Do not proceed if the kernel's base revision is not supported or valid.
     if (!base_revision.isSupported()) {
         @panic("Base revision not supported by bootloader");
+    }
+    if (!base_revision.isValid()) {
+        @panic("Base revision not valid");
     }
 
     if (builtin.is_test) {

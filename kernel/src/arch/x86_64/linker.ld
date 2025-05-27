@@ -32,27 +32,18 @@ SECTIONS {
         KEEP(*(.limine_requests_end))
     } :limine_requests
 
-    /* Move to the next memory page for .text */
-    . = ALIGN(CONSTANT(MAXPAGESIZE));
-
     /* The text section. which holds the code we will execute. */
-    .text : {
+    .text : ALIGN(CONSTANT(MAXPAGESIZE)) {
         *(.text*)
     } :text
 
-    /* Move to the next memory page for .rodata */
-    . = ALIGN(CONSTANT(MAXPAGESIZE));
-
     /* Data that already has some value (often non-zero), but is read-only. */
-    .rodata : {
+    .rodata : ALIGN(CONSTANT(MAXPAGESIZE)) {
         *(.rodata*)
     } :rodata
 
-    /* Move to the next memory page for .data */
-    . = ALIGN(CONSTANT(MAXPAGESIZE));
-
     /* Data that already has some value (often non-zero) and is readable and writable. */
-    .data : {
+    .data : ALIGN(CONSTANT(MAXPAGESIZE)) {
         *(.data*)
     } :data
 
@@ -70,9 +61,27 @@ SECTIONS {
         __stack_top = .;
     } :data
 
-    /* Discard .note.* and .eh_frame* since they may cause issues on some hosts. */
+    /* DWARF debug info */
+    .debug_abbrev : ALIGN(CONSTANT(MAXPAGESIZE)) { 
+        KEEP(*(.debug_abbrev*))
+    }
+    .debug_info : ALIGN(CONSTANT(MAXPAGESIZE)) { 
+        KEEP(*(.debug_info*))
+    }
+    .debug_line : ALIGN(CONSTANT(MAXPAGESIZE)) { 
+        KEEP(*(.debug_line*))
+    }
+    .debug_ranges : ALIGN(CONSTANT(MAXPAGESIZE)) {
+        KEEP(*(.debug_ranges*))
+    }
+    .debug_str : ALIGN(CONSTANT(MAXPAGESIZE)) {         
+        KEEP(*(.debug_str*))
+    }
+
+    /* Discard comment, eh_frame and note sections */
     /DISCARD/ : {
-        *(.eh_frame*)
+        *(.eh_frame .eh_frame.*)
+        *(.comment .comment.*)
         *(.note .note.*)
     }
 }
