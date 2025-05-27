@@ -24,6 +24,7 @@ PHDRS {
 SECTIONS {
     /* Specify where to start the kernel from in memory */
     . = KERNEL_START;
+    __kernel_start = .;
 
     /* Define a section to contain the Limine requests and assign it to its own PHDR */
     .limine_requests : {
@@ -33,18 +34,18 @@ SECTIONS {
     } :limine_requests
 
     /* The text section. which holds the code we will execute. */
-    .text : ALIGN(CONSTANT(MAXPAGESIZE)) {
-        *(.text*)
+    .text : ALIGN(CONSTANT(MAXPAGESIZE)) {        
+        *(.text .text.*)
     } :text
 
     /* Data that already has some value (often non-zero), but is read-only. */
     .rodata : ALIGN(CONSTANT(MAXPAGESIZE)) {
-        *(.rodata*)
+        *(.rodata .rodata.*)
     } :rodata
 
     /* Data that already has some value (often non-zero) and is readable and writable. */
     .data : ALIGN(CONSTANT(MAXPAGESIZE)) {
-        *(.data*)
+        *(.data .data.*)
     } :data
 
     /* Data that does not have any value (often zero) and is readable and writable.
@@ -52,8 +53,8 @@ SECTIONS {
        unnecessary zeros will be written to the binary. If you need, for example, 
        .init_array and .fini_array, those should be placed above this. */
     .bss : {
-        *(.bss*)
-        *(COMMON*)
+        *(.bss .bss.*)
+        *(COMMON)
         
         . = ALIGN(16);
         __stack_bottom = .;
@@ -63,20 +64,32 @@ SECTIONS {
 
     /* DWARF debug info */
     .debug_abbrev : ALIGN(CONSTANT(MAXPAGESIZE)) { 
+        __debug_info_start = .;
         KEEP(*(.debug_abbrev*))
+        __debug_info_end = .;
     }
     .debug_info : ALIGN(CONSTANT(MAXPAGESIZE)) { 
+        __debug_abbrev_start = .;
         KEEP(*(.debug_info*))
+        __debug_abbrev_end = .;
     }
     .debug_line : ALIGN(CONSTANT(MAXPAGESIZE)) { 
+        __debug_str_start = .;
         KEEP(*(.debug_line*))
+        __debug_str_end = .;
     }
     .debug_ranges : ALIGN(CONSTANT(MAXPAGESIZE)) {
+        __debug_line_start = .;
         KEEP(*(.debug_ranges*))
+        __debug_line_end = .;
     }
-    .debug_str : ALIGN(CONSTANT(MAXPAGESIZE)) {         
+    .debug_str : ALIGN(CONSTANT(MAXPAGESIZE)) {        
+        __debug_ranges_start = .; 
         KEEP(*(.debug_str*))
+        __debug_ranges_end = .;
     }
+
+    __kernel_end = .;
 
     /* Discard comment, eh_frame and note sections */
     /DISCARD/ : {
