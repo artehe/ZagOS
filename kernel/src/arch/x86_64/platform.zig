@@ -20,7 +20,7 @@ pub fn hang() noreturn {
 
 /// The specific initialisation for this platform (architecture).
 pub fn init() void {
-    log.info("Initialising kernel for x86_64", .{});
+    log.info("Initialising kernel architecture: x86_64", .{});
 
     gdt.init();
 

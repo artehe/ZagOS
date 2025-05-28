@@ -7,11 +7,15 @@ const builtin = @import("builtin");
 const std = @import("std");
 const log = std.log.scoped(.test_runner);
 
-const kernel = @import("kernel");
+const kernel_panic = @import("panic.zig");
+const logging = @import("logging.zig");
 
 /// Set the standard library options and panic function
-pub const std_options = kernel.std_options;
-pub const panic = kernel.panic;
+pub const panic = kernel_panic.panic;
+pub const std_options = std.Options{
+    .log_level = .debug,
+    .logFn = logging.logFn,
+};
 
 /// The custom test runner
 pub fn runTests() noreturn {

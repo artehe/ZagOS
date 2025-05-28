@@ -12,21 +12,39 @@ LIMINE_PATH := boot/limine
 # ISO paths
 ISO := ZagOS.iso
 ISO_DIR := iso
+ISO_XORRISO_FLAGS := \
+	-as mkisofs \
+	-R \
+	-r \
+	-J \
+	-b $(LIMINE_PATH)/limine-bios-cd.bin \
+	-no-emul-boot \
+	-boot-load-size 4 \
+	-boot-info-table \
+	-hfsplus \
+	-apm-block-size 2048 \
+	--efi-boot $(LIMINE_PATH)/limine-uefi-cd.bin \
+	-efi-boot-part \
+	--efi-boot-image \
+	--protective-msdos-label
+ISO_TEST := ZagOS_Test.iso
 
 # Kernel paths
 KERNEL := kernel/zig-out/bin/kernel
+KERNEL_TEST := kernel/zig-out/bin/kernel_test
 
 # Qemu emulator
 QEMU := qemu-system-$(ARCH)
-QEMU_FLAGS := -m 128M -cdrom $(ISO) -serial file:serial.log -daemonize
-QEMU_DEBUG_FLAGS := -s
+QEMU_FLAGS := -m 128M -serial file:serial.log -daemonize
+QEMU_RUN_FLAGS := -cdrom $(ISO)
+QEMU_DEBUG_FLAGS := $(QEMU_RUN_FLAGS) -s
+QEMU_TEST_FLAGS := -cdrom $(ISO_TEST)
 
 # Default target. This must come first!
 .PHONY: all
 all: $(ISO)
 
-# Creates a bootable ISO image.
-$(ISO): $(LIMINE_PATH) kernel
+iso-setup:
 	# Delete any existing temporary ISO directory.
 	rm -rf $(ISO_DIR)
 
@@ -45,18 +63,27 @@ $(ISO): $(LIMINE_PATH) kernel
 	# Copy the Limine bootloader configuration file.
 	cp -v boot/limine.conf $(ISO_DIR)/boot/limine.conf  
 
+# Creates a bootable ISO image.
+$(ISO): $(LIMINE_PATH) iso-setup kernel
 	# Copy the kernel binary.
 	cp -v $(KERNEL) $(ISO_DIR)
 
 	# Create the bootable ISO.
-	xorriso -as mkisofs -R -r -J -b $(LIMINE_PATH)/limine-bios-cd.bin         \
-			-no-emul-boot -boot-load-size 4 -boot-info-table -hfsplus         \
-			-apm-block-size 2048 --efi-boot $(LIMINE_PATH)/limine-uefi-cd.bin \
-			-efi-boot-part --efi-boot-image --protective-msdos-label          \
-			$(ISO_DIR) -o $(ISO)
+	xorriso $(ISO_XORRISO_FLAGS) $(ISO_DIR) -o $(ISO)
 
 	# Install Limine stage 1 and 2 for legacy BIOS boot.
 	./$(LIMINE_PATH)/limine bios-install $(ISO)
+
+# Creates a bootable ISO image for testing the kernel with
+$(ISO_TEST): $(LIMINE_PATH) iso-setup kernel
+	# Copy the test kernel binary.
+	cp -v $(KERNEL_TEST) $(ISO_DIR)/kernel
+
+	# Create the bootable ISO.
+	xorriso $(ISO_XORRISO_FLAGS) $(ISO_DIR) -o $(ISO_TEST)
+
+	# Install Limine stage 1 and 2 for legacy BIOS boot.
+	./$(LIMINE_PATH)/limine bios-install $(ISO_TEST)
 
 # Cleans up everything (build artifacts and log files)
 .PHONY: clean
@@ -66,6 +93,7 @@ clean:
 	rm -rf kernel/zig-out
 	rm -rf $(ISO_DIR) 
 	rm $(ISO)
+	rm $(ISO_TEST)
 	rm serial.log
 
 # Build the kernel binary.
@@ -87,13 +115,14 @@ $(LIMINE_PATH):
 # Run the generated ISO image in QEMU.
 .PHONY: run
 run: $(ISO)
-	$(QEMU) $(QEMU_FLAGS)
+	$(QEMU) $(QEMU_FLAGS) $(QEMU_RUN_FLAGS)
 
 # Run the generated ISO image in QEMU with connectivity enabled
 .PHONY: run-debug
 run-debug: $(ISO)
 	$(QEMU) $(QEMU_FLAGS) $(QEMU_DEBUG_FLAGS)
 
-.PHONY: test
-test: kernel
-	cd kernel && zig test $(ZIG_FLAGS)
+# Run the generated Test ISO image in QEMU
+.PHONY: run-test
+run-test: $(ISO_TEST)
+	$(QEMU) $(QEMU_FLAGS) $(QEMU_TEST_FLAGS)
