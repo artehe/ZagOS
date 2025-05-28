@@ -181,7 +181,8 @@ This project is licensed under the Unlicense ([LICENSE](LICENSE) or <https://ope
 ZagOS depends on several other projects for assets and/or software. These dependencies are NOT covered by the for ZagOS License. These are instead licensed as described by each individual project's documentation, and with the licenses used by said projects linked in the list below:
 
 - [Limine Bootloader][2] ([LICENSE](https://github.com/limine-bootloader/limine/blob/v9.x/LICENSES/LicenseRef-scancode-bsd-no-disclaimer-unmodified.txt))
-- [Tamsyn Font][3] ([LICENSE](assets/fonts/tamsyn-font-1.11/LICENSE))
+- [Limine Zig][3] ([LICENSE](boot/limine-zig/LICENSE))
+- [Tamsyn Font][4] ([LICENSE](assets/fonts/tamsyn-font-1.11/LICENSE))
 
 ## Contributing
 
@@ -195,4 +196,5 @@ Some very helpful documents which can be useful for developing this OS:
 
 [1]: https://ziglang.org/
 [2]: https://github.com/limine-bootloader/limine
-[3]: http://www.fial.com/~scott/tamsyn-font/
+[3]: https://github.com/48cf/limine-zig
+[4]: http://www.fial.com/~scott/tamsyn-font/

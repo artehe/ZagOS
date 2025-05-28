@@ -82,7 +82,6 @@ pub fn build(b: *std.Build) void {
                 },
                 .target = resolved_target_query,
             });
-            kernel_test.root_module.addImport("kernel", kernel_module);
             kernel_test.setLinkerScript(b.path("src/arch/x86_64/linker.ld"));
             b.installArtifact(kernel_test);
         },

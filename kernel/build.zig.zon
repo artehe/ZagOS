@@ -1,8 +1,7 @@
 .{
     .dependencies = .{
         .limine_zig = .{
-            .url = "git+https://github.com/48cf/limine-zig?ref=trunk#4281ba905cabe6d8ccd3e062d2e48364c3485172",
-            .hash = "limine_zig-0.0.0-1TjwQOl6AACYbbHZxh6lCxJ-WMBUoz03PUuBZhpKlxQs",
+            .path = "../boot/limine-zig",
         },
     },
     .fingerprint = 0x5dd29aabdbc5d59c,
