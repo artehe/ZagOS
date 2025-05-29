@@ -21,9 +21,6 @@ pub const std_options = std.Options{
     .logFn = logging.logFn,
 };
 
-/// Sets the base revision of the limine protocol which is supported by the kernel
-export var base_revision: limine.BaseRevision linksection(".limine_requests") = .init(3);
-
 /// The kernel's main function where most of the setup and then future runnin happens
 fn main() noreturn {
     log.info("Hello World from ZagOS Kernel", .{});
@@ -44,15 +41,6 @@ fn main() noreturn {
 /// The Kernel's entry point
 export fn _start() callconv(.C) noreturn {
     arch.platform.setup();
-
-    // Do not proceed if the kernel's base revision is not supported or valid.
-    if (!base_revision.isSupported()) {
-        @panic("Base revision not supported by bootloader");
-    }
-    if (!base_revision.isValid()) {
-        @panic("Base revision not valid");
-    }
-
     if (builtin.is_test) {
         test_runner.runTests();
     } else {
