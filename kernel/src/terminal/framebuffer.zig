@@ -4,8 +4,7 @@ const std = @import("std");
 const assert = std.debug.assert;
 const log = std.log.scoped(.framebuffer);
 
-const limine = @import("limine");
-const FramebufferRequest = limine.FramebufferRequest;
+const limine = @import("../limine.zig");
 
 pub const Colour = packed struct {
     blue: u8,
@@ -55,9 +54,6 @@ pub var height: usize = undefined;
 /// Width of the framebuffer in pixels.
 pub var width: usize = undefined;
 
-/// The framebuffer request structure which is filled by the Limine bootloader.
-export var framebuffer_request: FramebufferRequest linksection(".limine_requests") = .{};
-
 // Clear the framebuffer
 pub fn clear() void {
     const blank_pixel = Pixel.init(Colour.init(0x00, 0x00, 0x00));
@@ -93,7 +89,7 @@ pub fn init() void {
     log.info("Loading Framebuffer", .{});
 
     // Ensure that we have got a framebuffer generated for us
-    if (framebuffer_request.response) |framebuffer_response| {
+    if (limine.framebuffer_request.response) |framebuffer_response| {
         // Get the framebuffer we will use
         const framebuffers = framebuffer_response.getFramebuffers();
         const selected_frambuffer = framebuffers[0];
