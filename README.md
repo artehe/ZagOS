@@ -17,6 +17,7 @@ Currently the only supported architecture is x86_64 (x64). However the project s
     - [Options](#options)
   - [Run](#run)
   - [Debug](#debug)
+  - [Test](#test)
 - [License](#license)
   - [3rd Party Acknowledgments](#3rd-party-acknowledgments)
 - [Contributing](#contributing)
@@ -76,11 +77,27 @@ All the features currently implemented and also the implementation progress of p
   - [ ] Filesystem(s) & Storage drivers (HDD, CD, FLP, Ramdisk)
   - [ ] Internal Debugger
 - Testing
-  - [ ] Add testing into GitHub actions.
-  - [ ] Setup test framework for OS (custom runner?)
-  - [ ] Add first unit tests
-  - [ ] Add first integration/runtime test
-  - [ ] Run tests on build?
+  - [X] Setup test framework for OS using a custom test runnner
+  - [X] Integrate test framework with GitHub actions CI
+  - [ ] Expand the formatter available for test code output via log so we can run other types of comparison...
+  - [ ] Remove the initial test test cases.
+  - [ ] Create our own custom log function for testing
+  - [ ] Refactor code into a test module (directory)
+  - [ ] Don't always run tests in the same order (we should probably have some way of regenerating the order that we use however)
+  - [ ] Add tests to GDT.zig
+  - [ ] Add tests to Interrupts.zig
+  - [ ] Add tests to Platform.zig
+  - [ ] Add tests to Port.zig
+  - [ ] Add tests to Serial.zig
+  - [ ] Add tests to Limine.zig
+  - [ ] Add tests to Logging.zig
+  - [ ] Add tests to Main.zig
+  - [ ] Add tests to Panic.zig
+  - [ ] Add tests to Test_Runner.zig
+  - [ ] Add tests to Font.zig
+  - [ ] Add tests to Framebuffer.zig
+  - [ ] Add tests to Terminal.zig
+  - [ ] Add configurable timeout to each test run (default 5 minutes?) in case we get a situation where we hit and endless loop?
 - Long Term (probably the far far far far farrrrrrr future)
   - User Space
     - [ ] Switch to (Ring-3)
@@ -171,6 +188,16 @@ make run-debug
 ```
 
 Alternatively if you use VS Code then this can be done from within the editor by using the inbuild tasks (or just press F5), this will then automatically connect with GDB for you.
+
+### Test
+
+Similar to previously all of the unit/integration tests can be run via:
+
+```shell
+make run-test
+```
+
+This will launch the OS in test mode the the custom [Zig][1] test runnner and execute all of the tests which are found outputting the results to the screen and producing an error code on failure.
 
 ## License
 
