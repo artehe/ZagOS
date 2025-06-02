@@ -10,7 +10,6 @@ const limine = @import("limine.zig");
 const logging = @import("logging.zig");
 const kernel_panic = @import("panic.zig");
 const terminal = @import("terminal/module.zig");
-const test_runner = @import("test_runner.zig");
 
 // As this need to be in the root source file, all we do is call our actual kernel panic handler
 pub const panic = kernel_panic.panic;
@@ -40,6 +39,11 @@ fn main() noreturn {
 
 /// The main function when running kernel tests.
 fn testMain() noreturn {
+    // A unique case where we want to import the type in the function as this is
+    // only used for tests
+    const test_runner = @import("test_runner.zig");
+    const QemuExitCode = test_runner.QemuExitCode;
+
     // Run all the located tests
     const test_functions_list = builtin.test_functions;
     log.info("Found {} tests", .{test_functions_list.len});
@@ -71,11 +75,10 @@ fn testMain() noreturn {
         log.info("{d} test(s) skipped", .{skip_count});
     }
 
-    switch (builtin.cpu.arch) {
-        .x86_64 => {
-            log.debug("Shutting down", .{});
-        },
-        else => @compileError("Architecture not currently supported!"),
+    if (fail_count > 0) {
+        test_runner.exitQemu(QemuExitCode.failed);
+    } else {
+        test_runner.exitQemu(QemuExitCode.success);
     }
     unreachable;
 }
@@ -92,7 +95,11 @@ export fn _start() callconv(.C) noreturn {
     unreachable;
 }
 
-test "testing simple sum" {
+test "trivial assertion" {
+    try std.testing.expect(1 == 0);
+}
+
+test "simple sum" {
     const a: u8 = 2;
     const b: u8 = 2;
     try std.testing.expect((a + b) == 4);

@@ -5,6 +5,7 @@ const log = std.log.scoped(.platform);
 
 const gdt = @import("gdt.zig");
 const interrupts = @import("interrupts.zig");
+pub const port = @import("port.zig");
 pub const serial = @import("serial.zig");
 
 pub extern const __stack_bottom: anyopaque;
