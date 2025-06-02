@@ -95,11 +95,11 @@ export fn _start() callconv(.C) noreturn {
     unreachable;
 }
 
-test "trivial assertion" {
+test "trivial_assertion" {
     try std.testing.expect(1 == 0);
 }
 
-test "simple sum" {
+test "simple_sum" {
     const a: u8 = 2;
     const b: u8 = 2;
     try std.testing.expect((a + b) == 4);

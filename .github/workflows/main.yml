@@ -32,6 +32,12 @@ jobs:
           # Version of the Zig compiler, e.g. "0.13.0" or "0.13.0-dev.351+64ef45eb0". "master" uses the latest nightly build. "latest" uses the latest tagged release.
           version: "0.14.0" # default is latest
 
+      # Ensure that Qemu is present and installed
+      - name: Install qemu
+        run: |
+          sudo apt-get update
+          sudo apt-get install qemu qemu-system --fix-missing
+
       # We want to be certain the formatting is standardised 
       - name: Check Formatting
         run: zig fmt --check kernel
@@ -39,3 +45,7 @@ jobs:
       # Now we check that the kernel builds
       - name: Build kernel
         run: make kernel
+
+      # Assemble and run the test kernel in qemu checking for any failed tests
+      - name: Test kernel
+        run: make run-test

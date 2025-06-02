@@ -35,10 +35,23 @@ KERNEL_TEST := kernel/zig-out/bin/kernel_test
 
 # Qemu emulator
 QEMU := qemu-system-$(ARCH)
-QEMU_FLAGS := -m 128M -serial file:serial.log -daemonize
-QEMU_RUN_FLAGS := -cdrom $(ISO)
-QEMU_DEBUG_FLAGS := $(QEMU_RUN_FLAGS) -s
-QEMU_TEST_FLAGS := -cdrom $(ISO_TEST)
+QEMU_FLAGS := \
+	-m 128M
+QEMU_RUN_FLAGS := \
+	-cdrom $(ISO) \
+	-daemonize \
+	-serial file:serial.log
+QEMU_DEBUG_FLAGS := \
+	$(QEMU_RUN_FLAGS) \
+	-s
+QEMU_TEST_FLAGS := \
+	-cdrom $(ISO_TEST) \
+	-device isa-debug-exit,iobase=0xf4,iosize=0x04 \
+	-display none \
+	-serial stdio
+
+# Test specific configuration
+TEST_SUCCESS_EXIT_CODE = 33
 
 # Default target. This must come first!
 .PHONY: all
@@ -55,7 +68,7 @@ iso-setup:
 
 	# Create the limine directories and copy the Limine bootloader binaries.
 	mkdir -p $(ISO_DIR)/$(LIMINE_PATH)
-	cp -v $(LIMINE_PATH)/limine-bios.sys    \
+	cp -v $(LIMINE_PATH)/limine-bios.sys \
 	      $(LIMINE_PATH)/limine-bios-cd.bin \
 	      $(LIMINE_PATH)/limine-uefi-cd.bin \
 	      $(ISO_DIR)/$(LIMINE_PATH)/
@@ -105,8 +118,8 @@ kernel:
 $(LIMINE_PATH):
 	# Download the latest Limine binary release for the 9.x branch.
 	git clone https://github.com/limine-bootloader/limine.git \
-		--branch=v9.x-binary                                  \
-		--depth=1                                             \
+		--branch=v9.x-binary \
+		--depth=1 \
 		$(LIMINE_PATH)
 
 	# Build "limine" utility.
@@ -125,4 +138,9 @@ run-debug: $(ISO)
 # Run the generated Test ISO image in QEMU
 .PHONY: run-test
 run-test: $(ISO_TEST)
-	$(QEMU) $(QEMU_FLAGS) $(QEMU_TEST_FLAGS)
+	$(QEMU) $(QEMU_FLAGS) $(QEMU_TEST_FLAGS); \
+	if [ $$? -ne $(TEST_SUCCESS_EXIT_CODE) ]; \
+	then \
+		echo "Test failed to run successfully"; \
+		false; \
+	fi
