@@ -3,14 +3,15 @@
 const std = @import("std");
 const log = std.log.scoped(.gdt);
 
+const cpu = @import("cpu.zig");
 const interrupts = @import("interrupts.zig");
 const platform = @import("platform.zig");
 
 /// The CPU Privilege Level for the GDT segment's access, where 0 = highest privilege, and
 /// 3 = lowest privilege.
 const DescriptorPrivilegeLevel = enum(u2) {
-    kernel = 0,
-    user = 3,
+    kernel = 0b00,
+    user = 0b11,
 };
 
 /// The type for a GDT segment access.
@@ -168,21 +169,13 @@ const Flags = packed struct {
 };
 
 /// Defines an entry in the GDT table.
-const GdtEntry = packed struct {
+const SegmentDescriptor = packed struct {
     limit_low: u16,
     base_low: u24,
     access: Access,
     limit_high: u4,
     flags: Flags,
     base_high: u8,
-};
-
-/// Special GDT pointer
-const GdtRegister = packed struct {
-    /// limit: which is GDT Length - 1
-    limit: u16,
-    /// Location in memory.
-    base: u64,
 };
 
 /// The structure for a TSS entry
@@ -216,12 +209,12 @@ const Tss = packed struct {
 };
 
 /// The size of the GTD in bytes (minus 1).
-const GDT_SIZE: u16 = @sizeOf(GdtEntry) * NUMBER_OF_ENTRIES - 1;
+const GDT_SIZE: u16 = @sizeOf(SegmentDescriptor) * NUMBER_OF_ENTRIES - 1;
 /// The total number of entries in the GDT
 const NUMBER_OF_ENTRIES: u16 = 0x07;
 
 /// The GDT, with it's required entries
-var gdt: [NUMBER_OF_ENTRIES]GdtEntry align(4096) = .{
+var gdt: [NUMBER_OF_ENTRIES]SegmentDescriptor align(4096) = .{
     // The mandatory NULL descriptor
     createEntry(0x0, 0x0, Access.zero, Flags.zero),
 
@@ -238,7 +231,7 @@ var gdt: [NUMBER_OF_ENTRIES]GdtEntry align(4096) = .{
     createEntry(0x0, 0x0, Access.zero, Flags.zero),
 };
 /// The special GDT pointer
-var gdt_register: GdtRegister = undefined;
+var gdt_register: cpu.SystemTableRegister = undefined;
 /// The 64 bit Task State Segment entry.
 var tss: Tss = .{
     .iopb = 0,
@@ -259,8 +252,8 @@ var tss: Tss = .{
 };
 
 /// Create an entry for the Global Descriptor Table
-fn createEntry(base: u32, limit: u32, access: Access, flags: Flags) GdtEntry {
-    return GdtEntry{
+fn createEntry(base: u32, limit: u32, access: Access, flags: Flags) SegmentDescriptor {
+    return SegmentDescriptor{
         // Setup the descriptor base address
         .base_low = @truncate(base),
         .base_high = @truncate(base >> 24),
@@ -282,9 +275,9 @@ fn loadGdt() void {
         .base = @intFromPtr(&gdt),
         .limit = GDT_SIZE,
     };
-    asm volatile ("lgdt %[gdtr]"
+    asm volatile ("lgdt (%[gdtr])"
         :
-        : [gdtr] "rm" (gdt_register),
+        : [gdtr] "r" (&gdt_register),
     );
 
     // Load the kernel code segment into the CS register
