@@ -41,45 +41,8 @@ fn main() noreturn {
 fn testMain() noreturn {
     // A unique case where we want to import the type in the function as this is
     // only used for tests
-    const test_runner = @import("test_runner.zig");
-    const QemuExitCode = test_runner.QemuExitCode;
-
-    // Run all the located tests
-    const test_functions_list = builtin.test_functions;
-    log.info("Found {} tests", .{test_functions_list.len});
-
-    var fail_count: usize = 0;
-    var pass_count: usize = 0;
-    var skip_count: usize = 0;
-
-    for (test_functions_list, 1..) |test_function, i| {
-        if (test_function.func()) |_| {
-            log.info("test {}/{} {s} passed", .{ i, test_functions_list.len, test_function.name });
-            pass_count += 1;
-        } else |err| switch (err) {
-            error.SkipZigTest => {
-                log.warn("test {}/{} {s} skipped", .{ i, test_functions_list.len, test_function.name });
-                skip_count += 1;
-            },
-            else => {
-                log.err("test {}/{} {s} failed with {s}", .{ i, test_functions_list.len, test_function.name, @errorName(err) });
-                fail_count += 1;
-            },
-        }
-    }
-
-    const total_run_tests = pass_count + fail_count;
-    log.info("Finished!", .{});
-    log.info("{d} of {d} run test(s) passed", .{ pass_count, total_run_tests });
-    if (skip_count > 0) {
-        log.info("{d} test(s) skipped", .{skip_count});
-    }
-
-    if (fail_count > 0) {
-        test_runner.exitQemu(QemuExitCode.failed);
-    } else {
-        test_runner.exitQemu(QemuExitCode.success);
-    }
+    const runner = @import("test_runner.zig");
+    runner.testRunner();
     unreachable;
 }
 

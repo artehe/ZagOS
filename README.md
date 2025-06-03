@@ -38,6 +38,7 @@ All the features currently implemented and also the implementation progress of p
   - Architecture
     - x86_64
       - [X] Serial port I/O
+        - [ ] Apply a mutex to reading and writing with the serial port.
       - [X] GDT and TSS
       - Interrupts
         - [ ] Create IDT
@@ -68,7 +69,8 @@ All the features currently implemented and also the implementation progress of p
       - [X] Draw fonts / characters
       - [ ] Parse Unicode table if there is one and use it.
       - [ ] Save font(s) to disk and then load dynamically as/if they are needed.
-    - [ ] Write text to screen
+    - [X] Write text to screen
+    - [ ] Apply a mutex to writing to the screen
     - [ ] Add color support
     - [ ] Add ANSI support: ANSI (American National Standards Institute) a standardised system of escape codes that modern computer terminals should understand. These escape codes allow a computer program to manipulate terminal color, text effects, clear the screen and move the text cursor around. [ANSI Escape Codes - Wikipedia](https://en.wikipedia.org/wiki/ANSI_escape_code).
     - [ ] Add Scrolling
@@ -80,8 +82,6 @@ All the features currently implemented and also the implementation progress of p
   - [X] Setup test framework for OS using a custom test runnner
   - [X] Integrate test framework with GitHub actions CI
   - [ ] Expand the formatter available for test code output via log so we can run other types of comparison...
-  - [ ] Create our own custom log function for testing
-  - [ ] Refactor code into a test module (directory)
   - [ ] Don't always run tests in the same order (we should probably have some way of regenerating the order that we use however)
   - [ ] Add tests to GDT.zig
   - [ ] Add tests to Interrupts.zig
