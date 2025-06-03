@@ -80,7 +80,6 @@ All the features currently implemented and also the implementation progress of p
   - [X] Setup test framework for OS using a custom test runnner
   - [X] Integrate test framework with GitHub actions CI
   - [ ] Expand the formatter available for test code output via log so we can run other types of comparison...
-  - [ ] Remove the initial test test cases.
   - [ ] Create our own custom log function for testing
   - [ ] Refactor code into a test module (directory)
   - [ ] Don't always run tests in the same order (we should probably have some way of regenerating the order that we use however)
