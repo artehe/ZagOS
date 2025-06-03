@@ -25,7 +25,6 @@ pub fn testRunner() noreturn {
     const test_functions_list = builtin.test_functions;
     logging.writeFormattedString("Found {} tests\n", .{test_functions_list.len});
 
-    var fail_count: usize = 0;
     var pass_count: usize = 0;
     var skip_count: usize = 0;
 
@@ -45,23 +44,19 @@ pub fn testRunner() noreturn {
                 skip_count += 1;
             },
             else => {
-                logging.writeFormattedString("[FAIL]\n Error: {s}\n", .{@errorName(err)});
-                fail_count += 1;
+                logging.writeFormattedString("[FAIL]\n Error: {}\n", .{err});
+                testing.exitQemu(QemuExitCode.failed);
             },
         }
     }
 
-    const total_run_tests = pass_count + fail_count;
+    const total_run_tests = pass_count;
     logging.writeFormattedString("Finished!\n", .{});
     logging.writeFormattedString("{d} of {d} run test(s) passed\n", .{ pass_count, total_run_tests });
     if (skip_count > 0) {
         logging.writeFormattedString("{d} test(s) skipped\n", .{skip_count});
     }
 
-    if (fail_count > 0) {
-        testing.exitQemu(QemuExitCode.failed);
-    } else {
-        testing.exitQemu(QemuExitCode.success);
-    }
+    testing.exitQemu(QemuExitCode.success);
     unreachable;
 }
