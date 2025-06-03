@@ -36,7 +36,7 @@ jobs:
       - name: Install qemu
         run: |
           sudo apt-get update
-          sudo apt-get install qemu qemu-system --fix-missing
+          sudo apt-get install qemu-system-x86 qemu-system --fix-missing
 
       # We want to be certain the formatting is standardised 
       - name: Check Formatting
