@@ -4,7 +4,7 @@ const std = @import("std");
 const log = std.log.scoped(.gdt);
 
 const cpu = @import("cpu.zig");
-const interrupts = @import("interrupts.zig");
+const interrupts = @import("interrupts/module.zig");
 const platform = @import("platform.zig");
 
 /// The CPU Privilege Level for the GDT segment's access, where 0 = highest privilege, and
