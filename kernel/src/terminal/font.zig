@@ -3,6 +3,7 @@
 const std = @import("std");
 const Endian = std.builtin.Endian;
 const log = std.log.scoped(.font);
+const testing = std.testing;
 
 /// Options for the common PSF struct generator
 const PsfHeaderMetrics = struct {
@@ -79,10 +80,10 @@ fn BuildPsf1Font(comptime file: []const u8) type {
     var reader = stream.reader();
 
     // magic (already validated)
-    _ = try reader.readIntLittle(u16);
+    _ = try reader.readInt(u16, Endian.little);
     // version
-    const font_mode = try reader.readIntLittle(u8);
-    const glyph_height = try reader.readIntLittle(u8);
+    const font_mode = try reader.readInt(u8, Endian.little);
+    const glyph_height = try reader.readInt(u8, Endian.little);
     const glyph_count = if (font_mode & PSF1_MODE_HAS512 == 1) 512 else 256;
 
     return BuildPsfCommon(.{
@@ -210,4 +211,139 @@ pub fn BuildFont(comptime path: []const u8) type {
     }
 
     @compileError("file isn't PSF (no matching magic)");
+}
+
+test "Build minimal PSF1 font and read glyphs" {
+    const PSF1_TEST_FILE = [_]u8{
+        0x36, 0x04, // PSF1 magic
+        0x00, // mode (256 glyphs)
+        0x01, // height (1 byte/glyph)
+        0b10101010, // glyph 0
+        0b01010101, // glyph 1
+    };
+
+    const Font = BuildPsf1Font(&PSF1_TEST_FILE);
+    const font = Font.init();
+
+    try testing.expect(256 == font.glyph_count);
+    try testing.expect(0b10101010 == font.glyphs[0][0]);
+    try testing.expect(0b01010101 == font.glyphs[1][0]);
+}
+
+test "Build minimal PSF2 font and read glyphs" {
+    const PSF2_TEST_FILE = [_]u8{
+        0x72, 0xb5, 0x4a, 0x86, // PSF2 magic
+        0x00, 0x00, 0x00, 0x00, // version
+        0x20, 0x00, 0x00, 0x00, // header size (32)
+        0x00, 0x00, 0x00, 0x00, // flags
+        0x02, 0x00, 0x00, 0x00, // glyph count (2)
+        0x01, 0x00, 0x00, 0x00, // glyph size (1 byte)
+        0x01, 0x00, 0x00, 0x00, // glyph height
+        0x08, 0x00, 0x00, 0x00, // glyph width
+        0b11110000, // glyph 0
+        0b00001111, // glyph 1
+    };
+
+    const Font = BuildPsf2Font(&PSF2_TEST_FILE);
+    const font = Font.init();
+
+    try testing.expect(2 == font.glyph_count);
+    try testing.expect(0b11110000 == font.glyphs[0][0]);
+    try testing.expect(0b00001111 == font.glyphs[1][0]);
+}
+
+test "PSF1 Pixel Iterator test" {
+    const PSF1_TEST_FILE = [_]u8{
+        0x36, 0x04, // PSF1 magic
+        0x00, // mode
+        0x01, // height
+        0b10101010, // glyph 0
+    };
+
+    const Font = BuildPsf1Font(&PSF1_TEST_FILE);
+    const font = Font.init();
+
+    var iter = font.pixelIterator(0);
+    try testing.expect(true == iter.next());
+    try testing.expect(false == iter.next());
+    try testing.expect(true == iter.next());
+    try testing.expect(false == iter.next());
+    try testing.expect(true == iter.next());
+    try testing.expect(false == iter.next());
+    try testing.expect(true == iter.next());
+    try testing.expect(false == iter.next());
+    try testing.expect(null == iter.next());
+}
+
+test "PixelIterator reset() sets index and bitcount to 0" {
+    const GLYPH = 0b11000000; // Will produce two leading 1-bits
+    const PSF1_TEST_FILE = [_]u8{
+        0x36, 0x04, // magic
+        0x00, // mode
+        0x01, // glyph height
+        GLYPH,
+    };
+
+    const Font = BuildPsf1Font(&PSF1_TEST_FILE);
+    const font = Font.init();
+
+    var iter = font.pixelIterator(0);
+
+    _ = iter.next(); // consume first bit
+    _ = iter.next(); // consume second bit
+
+    try std.testing.expect(2 == iter.bitcount);
+
+    iter.reset();
+
+    try std.testing.expect(0 == iter.index);
+    try std.testing.expect(0 == iter.bitcount);
+    try std.testing.expect(true == iter.next());
+    try std.testing.expect(true == iter.next());
+}
+
+test "PixelIterator alignForward skips to next byte index" {
+    const PSF1_TEST_FILE = [_]u8{
+        0x36, 0x04,
+        0x00,
+        0x02, // glyph height = 2 bytes
+        0b11110000, // byte 0
+        0b00001111, // byte 1
+    };
+
+    const Font = BuildPsf1Font(&PSF1_TEST_FILE);
+    const font = Font.init();
+    var iter = font.pixelIterator(0);
+
+    _ = iter.next(); // consume bit from first byte
+    iter.alignForward(); // should skip to byte 1
+    try std.testing.expect(1 == iter.index);
+
+    try std.testing.expect(false == iter.next()); // 0 from second byte
+    try std.testing.expect(false == iter.next());
+    try std.testing.expect(false == iter.next());
+    try std.testing.expect(false == iter.next());
+    try std.testing.expect(true == iter.next());
+}
+
+test "PixelIterator resetIndex to specific offset works" {
+    const PSF1_TEST_FILE = [_]u8{
+        0x36, 0x04,
+        0x00,
+        0x02, // glyph height = 2 bytes
+        0b10101010, // byte 0
+        0b01010101, // byte 1
+    };
+
+    const Font = BuildPsf1Font(&PSF1_TEST_FILE);
+    const font = Font.init();
+
+    var iter = font.pixelIterator(0);
+
+    iter.resetIndex(1); // skip to second byte
+    try std.testing.expect(1 == iter.index);
+    try std.testing.expect(false == iter.next());
+    try std.testing.expect(true == iter.next());
+    try std.testing.expect(false == iter.next());
+    try std.testing.expect(true == iter.next());
 }

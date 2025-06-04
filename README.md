@@ -81,7 +81,6 @@ All the features currently implemented and also the implementation progress of p
 - Testing
   - [X] Setup test framework for OS using a custom test runnner
   - [X] Integrate test framework with GitHub actions CI
-  - [ ] Expand the formatter available for test code output via log so we can run other types of comparison...
   - [ ] Don't always run tests in the same order (we should probably have some way of regenerating the order that we use however)
   - [ ] Add tests to GDT.zig
   - [ ] Add tests to Interrupts.zig
@@ -93,7 +92,6 @@ All the features currently implemented and also the implementation progress of p
   - [ ] Add tests to Main.zig
   - [ ] Add tests to Panic.zig
   - [ ] Add tests to Test_Runner.zig
-  - [ ] Add tests to Font.zig
   - [ ] Add tests to Framebuffer.zig
   - [ ] Add tests to Terminal.zig
   - [ ] Add configurable timeout to each test run (default 5 minutes?) in case we get a situation where we hit and endless loop?
