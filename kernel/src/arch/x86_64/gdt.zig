@@ -7,13 +7,6 @@ const cpu = @import("cpu.zig");
 const interrupts = @import("interrupts/module.zig");
 const platform = @import("platform.zig");
 
-/// The CPU Privilege Level for the GDT segment's access, where 0 = highest privilege, and
-/// 3 = lowest privilege.
-const DescriptorPrivilegeLevel = enum(u2) {
-    kernel = 0b00,
-    user = 0b11,
-};
-
 /// The type for a GDT segment access.
 const DescriptorType = enum(u1) {
     /// A system segment (e.g. a Task State Segment)
@@ -22,8 +15,15 @@ const DescriptorType = enum(u1) {
     data_code = 1,
 };
 
+/// The CPU Privilege Level for the GDT segment's access, where 0 = highest privilege, and
+/// 3 = lowest privilege.
+pub const DescriptorPrivilegeLevel = enum(u2) {
+    kernel = 0x0,
+    user = 0x3,
+};
+
 /// Selectors for the GDT to grab different parts.
-const SegmentSelector = enum(u16) {
+pub const SegmentSelector = enum(u16) {
     /// Null Segment Selector
     null_segment = 0x00,
     /// Kernel Code Selector
@@ -208,7 +208,7 @@ const Tss = packed struct {
     iopb: u16,
 };
 
-/// The size of the GTD in bytes (minus 1).
+/// The size of the GDT in bytes (minus 1).
 const GDT_SIZE: u16 = @sizeOf(SegmentDescriptor) * NUMBER_OF_ENTRIES - 1;
 /// The total number of entries in the GDT
 const NUMBER_OF_ENTRIES: u16 = 0x07;
@@ -216,19 +216,19 @@ const NUMBER_OF_ENTRIES: u16 = 0x07;
 /// The GDT, with it's required entries
 var gdt: [NUMBER_OF_ENTRIES]SegmentDescriptor align(4096) = .{
     // The mandatory NULL descriptor
-    createEntry(0x0, 0x0, Access.zero, Flags.zero),
+    createSegmentDescriptor(0x0, 0x0, Access.zero, Flags.zero),
 
     // The kernel mode code and data segments
-    createEntry(0x0, 0xFFFFF, Access.kernel_code, Flags.code),
-    createEntry(0x0, 0xFFFFF, Access.kernel_data, Flags.data),
+    createSegmentDescriptor(0x0, 0xFFFFF, Access.kernel_code, Flags.code),
+    createSegmentDescriptor(0x0, 0xFFFFF, Access.kernel_data, Flags.data),
 
     // The user mode code and data segments
-    createEntry(0x0, 0xFFFFF, Access.user_code, Flags.code),
-    createEntry(0x0, 0xFFFFF, Access.user_data, Flags.data),
+    createSegmentDescriptor(0x0, 0xFFFFF, Access.user_code, Flags.code),
+    createSegmentDescriptor(0x0, 0xFFFFF, Access.user_data, Flags.data),
 
     // The TSS split into lower and upper respectively, will be initialised during runtime
-    createEntry(0x0, 0x0, Access.zero, Flags.zero),
-    createEntry(0x0, 0x0, Access.zero, Flags.zero),
+    createSegmentDescriptor(0x0, 0x0, Access.zero, Flags.zero),
+    createSegmentDescriptor(0x0, 0x0, Access.zero, Flags.zero),
 };
 /// The special GDT pointer
 var gdt_register: cpu.SystemTableRegister = undefined;
@@ -252,7 +252,7 @@ var tss: Tss = .{
 };
 
 /// Create an entry for the Global Descriptor Table
-fn createEntry(base: u32, limit: u32, access: Access, flags: Flags) SegmentDescriptor {
+fn createSegmentDescriptor(base: u32, limit: u32, access: Access, flags: Flags) SegmentDescriptor {
     return SegmentDescriptor{
         // Setup the descriptor base address
         .base_low = @truncate(base),
@@ -322,13 +322,13 @@ pub fn init() void {
     tss.rsp0 = @intFromPtr(&platform.__stack_top);
 
     // Initialise the TSS
-    gdt[@intFromEnum(SegmentSelector.tss_lower) / 8] = createEntry(
+    gdt[@intFromEnum(SegmentSelector.tss_lower) / 8] = createSegmentDescriptor(
         @truncate(@intFromPtr(&tss)),
         @sizeOf(Tss) - 1,
         Access.tss,
         Flags.zero,
     );
-    gdt[@intFromEnum(SegmentSelector.tss_upper) / 8] = createEntry(
+    gdt[@intFromEnum(SegmentSelector.tss_upper) / 8] = createSegmentDescriptor(
         @truncate(@intFromPtr(&tss) >> 32),
         @truncate(@intFromPtr(&tss) >> 32),
         Access.zero,

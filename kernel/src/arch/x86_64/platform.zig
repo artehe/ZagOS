@@ -24,6 +24,7 @@ pub fn init() void {
     log.info("Initialising kernel architecture: x86_64", .{});
 
     gdt.init();
+    interrupts.init();
 
     log.info("Done", .{});
 }
