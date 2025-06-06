@@ -25,18 +25,18 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v4
 
-      # Ensure we are using the same Zig version as we support
-      - name: Setup Zig Compiler
-        uses: mlugg/setup-zig@v1.2.1
-        with:
-          # Version of the Zig compiler, e.g. "0.13.0" or "0.13.0-dev.351+64ef45eb0". "master" uses the latest nightly build. "latest" uses the latest tagged release.
-          version: "0.14.0" # default is latest
-
       # Ensure that Qemu and other required packages are present
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install qemu-system-x86 qemu-system xorriso --fix-missing
+          sudo apt-get install mtools qemu-system-x86 qemu-system xorriso --fix-missing
+
+      # Ensure we are using the same Zig version as we support
+      - name: Setup Zig Compiler
+        run: |
+          wget https://ziglang.org/download/0.14.1/zig-x86_64-linux-0.14.1.tar.xz
+          tar -xvf zig-x86_64-linux-0.14.1
+          echo "$HOME/zig-x86_64-linux-0.14.1" >> "$GITHUB_PATH"
 
       # We want to be certain the formatting is standardised 
       - name: Check Formatting
