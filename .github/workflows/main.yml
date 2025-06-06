@@ -35,7 +35,7 @@ jobs:
       - name: Setup Zig Compiler
         run: |
           wget https://ziglang.org/download/0.14.1/zig-x86_64-linux-0.14.1.tar.xz
-          tar -xvf zig-x86_64-linux-0.14.1.xz
+          tar -xvf zig-x86_64-linux-0.14.1.tar.xz
           echo "$HOME/zig-x86_64-linux-0.14.1" >> "$GITHUB_PATH"
 
       # We want to be certain the formatting is standardised 
