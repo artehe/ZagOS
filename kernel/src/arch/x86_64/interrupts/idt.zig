@@ -57,7 +57,7 @@ const GateDescriptor = packed struct {
 };
 
 /// Interrupt Function Type
-const InterruptFunction = *const fn () callconv(.Naked) noreturn;
+const InterruptHandler = fn () callconv(.Naked) void;
 
 /// The size of the IDT in bytes (minus 1).
 const IDT_SIZE: u16 = @sizeOf(GateDescriptor) * NUMBER_OF_ENTRIES - 1;
@@ -104,10 +104,10 @@ fn loadIdt() void {
 fn setGate(
     index: u8,
     dpl: gdt.DescriptorPrivilegeLevel,
-    interrupt_function: *const InterruptFunction,
+    handler: InterruptHandler,
 ) void {
     const descriptor = createGateDescriptor(
-        @intFromPtr(interrupt_function),
+        @intFromPtr(handler),
         dpl,
     );
     idt[index] = descriptor;

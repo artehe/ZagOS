@@ -41,15 +41,13 @@ All the features currently implemented and also the implementation progress of p
         - [ ] Apply a mutex to reading and writing with the serial port.
       - [X] GDT and TSS
       - Interrupts
-        - [ ] Create IDT
+        - [X] Setup IDT
+        - [X] Enable Interrupts
         - [ ] Create ISR handlers
         - [ ] Create IRQ handlers
         - [ ] Load ISR and IRQs into IDT
-        - [ ] Load IDT into CPU
-        - [ ] Enable Interrupts
         - [ ] Configure PIC
         - [ ] Configure APIC (then disable PIC)
-        - [ ] Enable Interrupts
       - Memory Management
         - [ ] Get the Memory Map from Limine
         - [ ] Physical Memory Manager
@@ -82,18 +80,6 @@ All the features currently implemented and also the implementation progress of p
   - [X] Setup test framework for OS using a custom test runnner
   - [X] Integrate test framework with GitHub actions CI
   - [ ] Don't always run tests in the same order (we should probably have some way of regenerating the order that we use however)
-  - [ ] Add tests to GDT.zig
-  - [ ] Add tests to Interrupts.zig
-  - [ ] Add tests to Platform.zig
-  - [ ] Add tests to Port.zig
-  - [ ] Add tests to Serial.zig
-  - [ ] Add tests to Limine.zig
-  - [ ] Add tests to Logging.zig
-  - [ ] Add tests to Main.zig
-  - [ ] Add tests to Panic.zig
-  - [ ] Add tests to Test_Runner.zig
-  - [ ] Add tests to Framebuffer.zig
-  - [ ] Add tests to Terminal.zig
   - [ ] Add configurable timeout to each test run (default 5 minutes?) in case we get a situation where we hit and endless loop?
 - Long Term (probably the far far far far farrrrrrr future)
   - User Space
