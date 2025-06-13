@@ -5,6 +5,7 @@ const builtin = std.builtin;
 const log = std.log.scoped(.panic);
 
 const arch = @import("arch/module.zig");
+const interrupts = arch.platform.interrupts;
 const logging = @import("logging.zig");
 
 /// Handles kernel panics, such @panic() or integer overflows.
@@ -18,5 +19,6 @@ pub fn panic(msg: []const u8, stack_trace: ?*builtin.StackTrace, return_address:
     log.info("Kernel will now hang forever", .{});
     log.err("======== End Panic ========\n", .{});
 
-    arch.platform.hang();
+    interrupts.disable();
+    arch.platform.halt();
 }

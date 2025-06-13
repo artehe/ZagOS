@@ -4,16 +4,15 @@ const std = @import("std");
 const log = std.log.scoped(.platform);
 
 const gdt = @import("gdt.zig");
-const interrupts = @import("interrupts/module.zig");
+pub const interrupts = @import("interrupts/module.zig");
 pub const port = @import("port.zig");
 pub const serial = @import("serial.zig");
 
 pub extern const __stack_bottom: anyopaque;
 pub extern const __stack_top: anyopaque;
 
-/// Stop any interrupts from being triggered and then loop endlessly
-pub fn hang() noreturn {
-    interrupts.disable();
+/// Loop endlessly
+pub fn halt() noreturn {
     while (true) {
         asm volatile ("hlt");
     }

@@ -176,7 +176,7 @@ export fn interruptsHandler(context: *InterruptStack) usize {
     }
 
     log.info("System Halted!", .{});
-    platform.hang();
+    platform.halt();
 }
 
 /// Sets and entry in the IDT for a given ISR.

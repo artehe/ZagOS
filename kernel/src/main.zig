@@ -34,7 +34,7 @@ fn main() noreturn {
 
     // The kernel should NEVER return so loop endlessly.
     log.info("Reached end of kernel main, looping forever", .{});
-    arch.platform.hang();
+    arch.platform.halt();
 }
 
 /// The main function when running kernel tests.
