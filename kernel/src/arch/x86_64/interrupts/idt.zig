@@ -56,8 +56,14 @@ const GateDescriptor = packed struct {
     }
 };
 
+/// The error set for the IDT
+pub const IdtError = error{
+    /// A IDT entry already exists for the provided index.
+    IdtEntryExists,
+};
+
 /// Interrupt Function Type
-const InterruptHandler = fn () callconv(.Naked) void;
+pub const InterruptHandler = fn () callconv(.Naked) void;
 
 /// The size of the IDT in bytes (minus 1).
 const IDT_SIZE: u16 = @sizeOf(GateDescriptor) * NUMBER_OF_ENTRIES - 1;
@@ -87,6 +93,11 @@ fn createGateDescriptor(offset: u64, dpl: gdt.DescriptorPrivilegeLevel) GateDesc
     };
 }
 
+/// Check whether a IDT gate has an entry
+pub fn isGateOpen(gate: GateDescriptor) bool {
+    return gate.present == 1;
+}
+
 /// Loads a new Interrupt Descriptor Table into the cpu.
 fn loadIdt() void {
     // Create and load the IDT pointer into the CPU
@@ -100,19 +111,6 @@ fn loadIdt() void {
     );
 }
 
-/// Sets an entry in the IDT
-fn setGate(
-    index: u8,
-    dpl: gdt.DescriptorPrivilegeLevel,
-    handler: InterruptHandler,
-) void {
-    const descriptor = createGateDescriptor(
-        @intFromPtr(handler),
-        dpl,
-    );
-    idt[index] = descriptor;
-}
-
 /// Initializes the Interrupt Descriptor Table.
 pub fn init() void {
     log.info("Loading IDT", .{});
@@ -124,4 +122,21 @@ pub fn init() void {
     loadIdt();
 
     log.info("Done", .{});
+}
+
+/// Sets an entry in the IDT
+pub fn setGate(
+    index: u8,
+    dpl: gdt.DescriptorPrivilegeLevel,
+    handler: InterruptHandler,
+) IdtError!void {
+    if (isGateOpen(idt[index])) {
+        return IdtError.IdtEntryExists;
+    }
+
+    const descriptor = createGateDescriptor(
+        @intFromPtr(&handler),
+        dpl,
+    );
+    idt[index] = descriptor;
 }

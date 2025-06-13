@@ -5,6 +5,7 @@ const std = @import("std");
 const log = std.log.scoped(.interrupts);
 
 const idt = @import("idt.zig");
+const isr = @import("isr.zig");
 
 /// Disables interrupts from being generated.
 pub inline fn disable() void {
@@ -24,6 +25,7 @@ pub fn init() void {
     disable();
 
     idt.init();
+    isr.init();
 
     // Just before returning from here we want to enable interrupts as they
     // should be safe to run now

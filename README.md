@@ -43,9 +43,8 @@ All the features currently implemented and also the implementation progress of p
       - Interrupts
         - [X] Setup IDT
         - [X] Enable Interrupts
-        - [ ] Create ISR handlers
+        - [X] Create ISR handlers
         - [ ] Create IRQ handlers
-        - [ ] Load ISR and IRQs into IDT
         - [ ] Configure PIC
         - [ ] Configure APIC (then disable PIC)
       - Memory Management
