@@ -33,6 +33,7 @@ jobs:
 
       # Ensure we are using the same Zig version as we support
       - name: Setup Zig Compiler
+        shell: bash
         run: |
           wget https://ziglang.org/download/0.14.1/zig-x86_64-linux-0.14.1.tar.xz
           tar -xvf zig-x86_64-linux-0.14.1.tar.xz
