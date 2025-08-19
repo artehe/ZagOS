@@ -43,7 +43,7 @@ jobs:
 
       # We want to be certain the formatting is standardised 
       - name: Check Formatting
-        run: ${HOME}/zig-x86_64-linux-${{env.ZIG_VERSION}}/zig fmt --check kernel
+        run: zig-x86_64-linux-${{env.ZIG_VERSION}}/zig fmt --check kernel
 
       # Now we check that the OS builds
       - name: Build
